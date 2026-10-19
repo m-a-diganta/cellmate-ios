@@ -2,14 +2,17 @@ import SwiftUI
 
 /// The footer: Home, Garage, History, Ask.
 struct RootTabView: View {
+    @State private var router = AppRouter()
+
     var body: some View {
-        TabView {
-            Tab("Home", systemImage: "house") { HomeView() }
-            Tab("Garage", systemImage: "battery.100.bolt") { GarageView() }
-            Tab("History", systemImage: "clock") { HistoryView() }
-            Tab("Ask", systemImage: "bubble.left") { AskView() }
+        TabView(selection: $router.selectedTab) {
+            Tab("Home", systemImage: "house", value: AppTab.home) { HomeView() }
+            Tab("Garage", systemImage: "battery.100.bolt", value: AppTab.garage) { GarageView() }
+            Tab("History", systemImage: "clock", value: AppTab.history) { HistoryView() }
+            Tab("Ask", systemImage: "bubble.left", value: AppTab.ask) { AskView() }
         }
         .tint(AppColor.accent)
+        .environment(router)
     }
 }
 
