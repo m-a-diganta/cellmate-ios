@@ -1,0 +1,552 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		EC85025430847988001CBEE2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC85023E30847987001CBEE2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC85024530847987001CBEE2;
+			remoteInfo = CellMate;
+		};
+		EC85025E30847988001CBEE2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC85023E30847987001CBEE2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC85024530847987001CBEE2;
+			remoteInfo = CellMate;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		EC85024630847987001CBEE2 /* CellMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CellMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC85025330847988001CBEE2 /* CellMateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CellMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC85025D30847988001CBEE2 /* CellMateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CellMateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		EC85024830847987001CBEE2 /* CellMate */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CellMate;
+			sourceTree = "<group>";
+		};
+		EC85025630847988001CBEE2 /* CellMateTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CellMateTests;
+			sourceTree = "<group>";
+		};
+		EC85026030847988001CBEE2 /* CellMateUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = CellMateUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		EC85024330847987001CBEE2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		EC85025030847988001CBEE2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		EC85025A30847988001CBEE2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		EC85023D30847987001CBEE2 = {
+			isa = PBXGroup;
+			children = (
+				EC85024830847987001CBEE2 /* CellMate */,
+				EC85025630847988001CBEE2 /* CellMateTests */,
+				EC85026030847988001CBEE2 /* CellMateUITests */,
+				EC85024730847987001CBEE2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		EC85024730847987001CBEE2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EC85024630847987001CBEE2 /* CellMate.app */,
+				EC85025330847988001CBEE2 /* CellMateTests.xctest */,
+				EC85025D30847988001CBEE2 /* CellMateUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		EC85024530847987001CBEE2 /* CellMate */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC85026530847988001CBEE2 /* Build configuration list for PBXNativeTarget "CellMate" */;
+			buildPhases = (
+				EC85024230847987001CBEE2 /* Sources */,
+				EC85024330847987001CBEE2 /* Frameworks */,
+				EC85024430847987001CBEE2 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				EC85024830847987001CBEE2 /* CellMate */,
+			);
+			name = CellMate;
+			productName = CellMate;
+			productReference = EC85024630847987001CBEE2 /* CellMate.app */;
+			productType = "com.apple.product-type.application";
+		};
+		EC85025230847988001CBEE2 /* CellMateTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC85026830847988001CBEE2 /* Build configuration list for PBXNativeTarget "CellMateTests" */;
+			buildPhases = (
+				EC85024F30847988001CBEE2 /* Sources */,
+				EC85025030847988001CBEE2 /* Frameworks */,
+				EC85025130847988001CBEE2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EC85025530847988001CBEE2 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EC85025630847988001CBEE2 /* CellMateTests */,
+			);
+			name = CellMateTests;
+			productName = CellMateTests;
+			productReference = EC85025330847988001CBEE2 /* CellMateTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		EC85025C30847988001CBEE2 /* CellMateUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC85026B30847988001CBEE2 /* Build configuration list for PBXNativeTarget "CellMateUITests" */;
+			buildPhases = (
+				EC85025930847988001CBEE2 /* Sources */,
+				EC85025A30847988001CBEE2 /* Frameworks */,
+				EC85025B30847988001CBEE2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				EC85025F30847988001CBEE2 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				EC85026030847988001CBEE2 /* CellMateUITests */,
+			);
+			name = CellMateUITests;
+			productName = CellMateUITests;
+			productReference = EC85025D30847988001CBEE2 /* CellMateUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EC85023E30847987001CBEE2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2710;
+				LastUpgradeCheck = 2710;
+				TargetAttributes = {
+					EC85024530847987001CBEE2 = {
+						CreatedOnToolsVersion = 27.1;
+					};
+					EC85025230847988001CBEE2 = {
+						CreatedOnToolsVersion = 27.1;
+						TestTargetID = EC85024530847987001CBEE2;
+					};
+					EC85025C30847988001CBEE2 = {
+						CreatedOnToolsVersion = 27.1;
+						TestTargetID = EC85024530847987001CBEE2;
+					};
+				};
+			};
+			buildConfigurationList = EC85024130847987001CBEE2 /* Build configuration list for PBXProject "CellMate" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = EC85023D30847987001CBEE2;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = EC85024730847987001CBEE2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				EC85024530847987001CBEE2 /* CellMate */,
+				EC85025230847988001CBEE2 /* CellMateTests */,
+				EC85025C30847988001CBEE2 /* CellMateUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		EC85024430847987001CBEE2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		EC85025130847988001CBEE2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		EC85025B30847988001CBEE2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		EC85024230847987001CBEE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		EC85024F30847988001CBEE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		EC85025930847988001CBEE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		EC85025530847988001CBEE2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC85024530847987001CBEE2 /* CellMate */;
+			targetProxy = EC85025430847988001CBEE2 /* PBXContainerItemProxy */;
+		};
+		EC85025F30847988001CBEE2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC85024530847987001CBEE2 /* CellMate */;
+			targetProxy = EC85025E30847988001CBEE2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		EC85026330847988001CBEE2 /* Debug configuration for PBXProject "CellMate" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		EC85026430847988001CBEE2 /* Release configuration for PBXProject "CellMate" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EC85026630847988001CBEE2 /* Debug configuration for PBXNativeTarget "CellMate" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diganta.CellMate;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		EC85026730847988001CBEE2 /* Release configuration for PBXNativeTarget "CellMate" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diganta.CellMate;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		EC85026930847988001CBEE2 /* Debug configuration for PBXNativeTarget "CellMateTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diganta.CellMateTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CellMate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CellMate";
+			};
+			name = Debug;
+		};
+		EC85026A30847988001CBEE2 /* Release configuration for PBXNativeTarget "CellMateTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diganta.CellMateTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CellMate.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/CellMate";
+			};
+			name = Release;
+		};
+		EC85026C30847988001CBEE2 /* Debug configuration for PBXNativeTarget "CellMateUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diganta.CellMateUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CellMate;
+			};
+			name = Debug;
+		};
+		EC85026D30847988001CBEE2 /* Release configuration for PBXNativeTarget "CellMateUITests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diganta.CellMateUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = CellMate;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EC85024130847987001CBEE2 /* Build configuration list for PBXProject "CellMate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC85026330847988001CBEE2 /* Debug configuration for PBXProject "CellMate" */,
+				EC85026430847988001CBEE2 /* Release configuration for PBXProject "CellMate" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		EC85026530847988001CBEE2 /* Build configuration list for PBXNativeTarget "CellMate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC85026630847988001CBEE2 /* Debug configuration for PBXNativeTarget "CellMate" */,
+				EC85026730847988001CBEE2 /* Release configuration for PBXNativeTarget "CellMate" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		EC85026830847988001CBEE2 /* Build configuration list for PBXNativeTarget "CellMateTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC85026930847988001CBEE2 /* Debug configuration for PBXNativeTarget "CellMateTests" */,
+				EC85026A30847988001CBEE2 /* Release configuration for PBXNativeTarget "CellMateTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		EC85026B30847988001CBEE2 /* Build configuration list for PBXNativeTarget "CellMateUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC85026C30847988001CBEE2 /* Debug configuration for PBXNativeTarget "CellMateUITests" */,
+				EC85026D30847988001CBEE2 /* Release configuration for PBXNativeTarget "CellMateUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EC85023E30847987001CBEE2 /* Project object */;
+	validationLevel = 1;
+}
