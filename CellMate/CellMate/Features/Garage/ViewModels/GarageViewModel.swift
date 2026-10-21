@@ -38,6 +38,9 @@ final class GarageViewModel {
     private let photoStore: (any InspectionPhotoStoring)?
 
     private(set) var inspectionSummaries: [UUID: String] = [:]
+    private(set) var inspectionStatuses: [
+        UUID: EvaluateInspectionDue.Status
+    ] = [:]
 
     var isBusy: Bool {
         isLoading || isSaving
@@ -89,6 +92,18 @@ final class GarageViewModel {
             // Update both lists only after both reads succeed.
             batteries = loadedBatteries
             chargers = loadedChargers
+            
+            let currentBatteryIDs = Set(loadedBatteries.map(\.id))
+
+            inspectionSummaries = inspectionSummaries.filter {
+                currentBatteryIDs.contains($0.key)
+            }
+
+            inspectionStatuses = inspectionStatuses.filter {
+                currentBatteryIDs.contains($0.key)
+            }
+
+            await refreshInspectionStatuses()
         } catch is CancellationError {
             // Leaving the screen can cancel loading.
         } catch {
@@ -114,6 +129,8 @@ final class GarageViewModel {
             let battery = try await registerBattery.execute(input)
 
             batteries.append(battery)
+            inspectionSummaries[battery.id] = "No inspections yet"
+            inspectionStatuses[battery.id] = .neverInspected
             return true
         } catch is CancellationError {
             return false
@@ -183,6 +200,7 @@ final class GarageViewModel {
                 batteries.append(retiredBattery)
             }
 
+            inspectionStatuses[retiredBattery.id] = .notRequired
             return true
         } catch is CancellationError {
             return false
@@ -199,6 +217,25 @@ final class GarageViewModel {
         chargers.first(where: {
             $0.id == battery.chargerID
         })?.name ?? "Charger unavailable"
+    }
+
+    private func summaryText(for inspection: Inspection) -> String {
+        let date = inspection.inspectedAt.formatted(
+            date: .abbreviated,
+            time: .omitted
+        )
+        let result: String
+
+        switch inspection.result {
+        case .pass:
+            result = "Pass"
+        case .caution:
+            result = "Caution"
+        case .fail:
+            result = "Fail"
+        }
+
+        return "\(date) · \(result)"
     }
 
     private func message(
@@ -236,18 +273,48 @@ final class GarageViewModel {
 
             try Task.checkCancellation()
 
-            if let latest = inspections.first {
+            guard let battery = batteries.first(where: {
+                $0.id == batteryID
+            }) else {
+                return
+            }
+
+            let latest = inspections.first
+
+            let status = try EvaluateInspectionDue().execute(
+                battery: battery,
+                latestInspection: latest
+            )
+
+            if let latest {
                 inspectionSummaries[batteryID] = summaryText(for: latest)
             } else {
                 inspectionSummaries[batteryID] = "No inspections yet"
             }
+
+            inspectionStatuses[batteryID] = status
         } catch is CancellationError {
             return
         } catch {
+            // Do not display an outdated status after a failed refresh.
+            inspectionStatuses.removeValue(forKey: batteryID)
+
             errorMessage = message(
                 for: error,
-                fallback: "The last inspection could not be loaded."
+                fallback: "Inspection information could not be loaded."
             )
+        }
+    }
+    
+    func refreshInspectionStatuses() async {
+        let batteryIDs = batteries.map(\.id)
+
+        for batteryID in batteryIDs {
+            guard !Task.isCancelled else {
+                return
+            }
+
+            await loadInspectionSummary(for: batteryID)
         }
     }
 
@@ -256,25 +323,26 @@ final class GarageViewModel {
         inspectionSummaries[inspection.batteryID] = summaryText(
             for: inspection
         )
-    }
 
-    private func summaryText(for inspection: Inspection) -> String {
-        let date = inspection.inspectedAt.formatted(
-            date: .abbreviated,
-            time: .omitted
-        )
-
-        let resultText: String
-
-        switch inspection.result {
-        case .pass:
-            resultText = "No problems reported"
-        case .caution:
-            resultText = "Caution recorded"
-        case .fail:
-            resultText = "Problem reported"
+        guard let battery = batteries.first(where: {
+            $0.id == inspection.batteryID
+        }) else {
+            return
         }
 
-        return "\(date) · \(resultText)"
+        do {
+            inspectionStatuses[battery.id] =
+                try EvaluateInspectionDue().execute(
+                    battery: battery,
+                    latestInspection: inspection
+                )
+        } catch {
+            inspectionStatuses.removeValue(forKey: battery.id)
+
+            errorMessage = message(
+                for: error,
+                fallback: "The inspection was saved, but its due date could not be calculated."
+            )
+        }
     }
 }
