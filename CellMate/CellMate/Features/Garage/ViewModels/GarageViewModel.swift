@@ -27,6 +27,9 @@ final class GarageViewModel {
 
     @ObservationIgnored
     private let registerCharger: RegisterCharger
+    
+    @ObservationIgnored
+    private let retireBattery: RetireBattery
 
     var isBusy: Bool {
         isLoading || isSaving
@@ -34,10 +37,14 @@ final class GarageViewModel {
 
     init(repository: any GarageRepository) {
         self.repository = repository
+        
         self.registerBattery = RegisterBattery(
             repository: repository
         )
         self.registerCharger = RegisterCharger(
+            repository: repository
+        )
+        self.retireBattery = RetireBattery(
             repository: repository
         )
     }
@@ -120,6 +127,48 @@ final class GarageViewModel {
             errorMessage = message(
                 for: error,
                 fallback: "The charger could not be saved. Please try again."
+            )
+            return false
+        }
+    }
+    
+    /// Returns true only when retirement was saved successfully.
+    func retireBattery(
+        id: UUID,
+        reason: String
+    ) async -> Bool {
+        guard !isBusy else { return false }
+
+        isSaving = true
+        errorMessage = nil
+
+        defer {
+            isSaving = false
+        }
+
+        do {
+            let retiredBattery = try await retireBattery.execute(
+                RetireBattery.Input(
+                    batteryID: id,
+                    reason: reason
+                )
+            )
+
+            if let index = batteries.firstIndex(where: {
+                $0.id == retiredBattery.id
+            }) {
+                batteries[index] = retiredBattery
+            } else {
+                batteries.append(retiredBattery)
+            }
+
+            return true
+        } catch is CancellationError {
+            return false
+        } catch {
+            errorMessage = message(
+                for: error,
+                fallback: "The battery could not be retired. Please try again."
             )
             return false
         }
