@@ -21,7 +21,7 @@ CellMate/
     Data/                   Core Data, repositories, mocks
     Platform/               notifications, Live Activity, permissions, assistant
     Features/
-      Onboarding  Home  Settings        Person 1
+      Onboarding  Home  Settings        Diganta
       Permissions                       Person 2
       Charge  History                   Person 3
       Garage  Inspect                   Person 4
@@ -33,4 +33,3 @@ docs/
   STYLE_AND_STRUCTURE.md    colours, rules, folder owners
 ```
 
-Read `docs/STYLE_AND_STRUCTURE.md` before you write any screen.
