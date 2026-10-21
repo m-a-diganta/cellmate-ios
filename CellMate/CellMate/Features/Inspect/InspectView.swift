@@ -2,6 +2,8 @@ import SwiftUI
 
 // Design: 11 Inspect, 12 Stop using
 import SwiftUI
+import PhotosUI
+import UIKit
 
 @MainActor
 struct InspectView: View {
@@ -9,10 +11,11 @@ struct InspectView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     @State private var viewModel: InspectionViewModel?
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var isLoadingPhoto = false
 
     private let batteryName: String
     private let backTitle: String
-    private let onAddPhoto: (() -> Void)?
     private let onFinish: (Inspection) -> Void
 
     // Keeps the existing Home screen's InspectView() call compiling.
@@ -21,7 +24,6 @@ struct InspectView: View {
         _viewModel = State(initialValue: nil)
         batteryName = ""
         backTitle = "Home"
-        onAddPhoto = nil
         onFinish = { _ in }
     }
 
@@ -29,12 +31,10 @@ struct InspectView: View {
         batteryName: String,
         viewModel: InspectionViewModel,
         backTitle: String = "Battery",
-        onAddPhoto: (() -> Void)? = nil,
         onFinish: @escaping (Inspection) -> Void
     ) {
         self.batteryName = batteryName
         self.backTitle = backTitle
-        self.onAddPhoto = onAddPhoto
         self.onFinish = onFinish
         _viewModel = State(initialValue: viewModel)
     }
@@ -57,13 +57,28 @@ struct InspectView: View {
         }
         .screenBackground()
         .toolbar(.hidden, for: .navigationBar)
-        .interactiveDismissDisabled(viewModel?.isSaving == true)
+        .interactiveDismissDisabled(
+            isLoadingPhoto ||
+            viewModel?.isBusy == true ||
+            (
+                viewModel?.photo != nil &&
+                viewModel?.savedInspection == nil
+            )
+        )
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
             Button {
-                dismiss()
+                Task {
+                    if let viewModel {
+                        if await viewModel.discardDraft() {
+                            dismiss()
+                        }
+                    } else {
+                        dismiss()
+                    }
+                }
             } label: {
                 Label(backTitle, systemImage: "chevron.left")
                     .font(.body)
@@ -72,7 +87,7 @@ struct InspectView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .disabled(viewModel?.isSaving == true)
+            .disabled(isLoadingPhoto || viewModel?.isBusy == true)
             .accessibilityLabel("Back to \(backTitle)")
 
             Text("Inspect")
@@ -110,8 +125,11 @@ struct InspectView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             finishSection(model)
         }
+        .task(id: selectedPhoto) {
+            await importSelectedPhoto(into: model)
+        }
         .alert(
-            "Could not save inspection",
+            "Inspection",
             isPresented: Binding(
                 get: { model.errorMessage != nil },
                 set: {
@@ -237,7 +255,11 @@ struct InspectView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .disabled(model.isSaving || model.savedInspection != nil)
+        .disabled(
+            isLoadingPhoto ||
+            model.isBusy ||
+            model.savedInspection != nil
+        )
         .accessibilityLabel("\(checkCopy(for: kind).title): \(title)")
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
@@ -245,7 +267,15 @@ struct InspectView: View {
     private func photoSection(
         _ model: InspectionViewModel
     ) -> some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
+        let photoButtonTitle: String
+
+        if case .some = model.photo {
+            photoButtonTitle = "Change photo"
+        } else {
+            photoButtonTitle = "Add photo"
+        }
+
+        return VStack(alignment: .leading, spacing: Spacing.sm) {
             ViewThatFits(in: .horizontal) {
                 HStack {
                     Text("Photos")
@@ -269,28 +299,61 @@ struct InspectView: View {
             }
             .foregroundStyle(AppColor.textPrimary)
 
-            if model.photo != nil {
-                Label("Photo attached", systemImage: "photo")
-                    .font(.subheadline)
-                    .foregroundStyle(AppColor.textSecondary)
+            let layout = dynamicTypeSize.isAccessibilitySize
+                ? AnyLayout(
+                    VStackLayout(
+                        alignment: .leading,
+                        spacing: Spacing.sm
+                    )
+                )
+                : AnyLayout(HStackLayout(spacing: Spacing.sm))
+
+            layout {
+                if let data = model.photoData,
+                   let image = UIImage(data: data) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 64, height: 64)
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: 10)
+                        )
+                        .accessibilityLabel("Attached inspection photo")
+                }
+
+                PhotosPicker(
+                    selection: $selectedPhoto,
+                    matching: .images,
+                    photoLibrary: .shared()
+                ) {
+                    Label(photoButtonTitle, systemImage: "photo")
+                    .padding(.horizontal, Spacing.sm)
+                    .padding(.vertical, Spacing.xs)
+                }
+                .buttonStyle(.appSecondary)
+                .disabled(!model.canAddPhoto || isLoadingPhoto)
             }
 
-            Button {
-                onAddPhoto?()
-            } label: {
-                Label(
-                    model.photo == nil ? "Add photo" : "Change photo",
-                    systemImage: "camera"
-                )
-                .padding(.horizontal, Spacing.sm)
-                .padding(.vertical, Spacing.xs)
+            if isLoadingPhoto || model.isProcessingPhoto {
+                ProgressView("Preparing photo…")
+                    .font(.footnote)
             }
-            .buttonStyle(.appSecondary)
-            .disabled(
-                onAddPhoto == nil ||
-                model.isSaving ||
-                model.savedInspection != nil
-            )
+
+            if model.photo != nil {
+                Button("Remove photo", role: .destructive) {
+                    Task {
+                        await model.removePhoto()
+                    }
+                }
+                .font(.footnote)
+                .foregroundStyle(AppColor.highText)
+                .frame(minHeight: 44)
+                .disabled(
+                    isLoadingPhoto ||
+                    model.isBusy ||
+                    model.savedInspection != nil
+                )
+            }
         }
         .card()
     }
@@ -332,7 +395,7 @@ struct InspectView: View {
                 .padding(.vertical, Spacing.sm)
             }
             .buttonStyle(.appPrimary)
-            .disabled(!model.canSave)
+            .disabled(!model.canSave || isLoadingPhoto)
         }
         .padding(Spacing.md)
         .background(AppColor.background)
@@ -352,6 +415,41 @@ struct InspectView: View {
             return ("Damage", "Cracks, leaks, or dents")
         case .charger:
             return ("Charger", "Damage or wrong match")
+        }
+    }
+    
+    private func importSelectedPhoto(
+        into model: InspectionViewModel
+    ) async {
+        guard let selectedPhoto else {
+            return
+        }
+
+        isLoadingPhoto = true
+        model.errorMessage = nil
+
+        defer {
+            isLoadingPhoto = false
+            self.selectedPhoto = nil
+        }
+
+        do {
+            guard let data = try await selectedPhoto.loadTransferable(
+                type: Data.self
+            ) else {
+                model.errorMessage =
+                    "This photo could not be loaded. Choose another photo."
+                return
+            }
+
+            try Task.checkCancellation()
+
+            await model.importPhoto(data: data)
+        } catch is CancellationError {
+            return
+        } catch {
+            model.errorMessage =
+                "This photo could not be loaded. Please try again."
         }
     }
 }
