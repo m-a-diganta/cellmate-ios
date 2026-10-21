@@ -33,6 +33,9 @@ final class GarageViewModel {
     
     @ObservationIgnored
     private let inspectionRepository: any InspectionRepository
+    
+    @ObservationIgnored
+    private let photoStore: (any InspectionPhotoStoring)?
 
     private(set) var inspectionSummaries: [UUID: String] = [:]
 
@@ -42,7 +45,8 @@ final class GarageViewModel {
 
     init(
         repository: any GarageRepository,
-        inspectionRepository: (any InspectionRepository)? = nil
+        inspectionRepository: (any InspectionRepository)? = nil,
+        photoStore: (any InspectionPhotoStoring)? = nil
     ) {
         self.repository = repository
 
@@ -50,6 +54,8 @@ final class GarageViewModel {
             ?? InMemoryInspectionRepository(
                 garageRepository: repository
             )
+
+        self.photoStore = photoStore
 
         self.registerBattery = RegisterBattery(
             repository: repository
@@ -216,7 +222,8 @@ final class GarageViewModel {
             logInspection: LogInspection(
                 garageRepository: repository,
                 inspectionRepository: inspectionRepository
-            )
+            ),
+            photoStore: photoStore
         )
     }
 
