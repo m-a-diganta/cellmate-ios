@@ -6,6 +6,10 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EC8502AB30847990001CBEE2 /* CellMateWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EC8502A030847990001CBEE2 /* CellMateWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		EC85025430847988001CBEE2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,17 +25,60 @@
 			remoteGlobalIDString = EC85024530847987001CBEE2;
 			remoteInfo = CellMate;
 		};
+		EC8502AD30847990001CBEE2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EC85023E30847987001CBEE2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EC8502A430847990001CBEE2;
+			remoteInfo = CellMateWidgetsExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		EC8502AC30847990001CBEE2 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				EC8502AB30847990001CBEE2 /* CellMateWidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		EC85024630847987001CBEE2 /* CellMate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CellMate.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC85025330847988001CBEE2 /* CellMateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CellMateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EC85025D30847988001CBEE2 /* CellMateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CellMateUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EC8502A030847990001CBEE2 /* CellMateWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CellMateWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EC8502A230847990001CBEE2 /* Exceptions for "CellMateWidgets" folder in "CellMateWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EC8502A430847990001CBEE2 /* CellMateWidgetsExtension */;
+		};
+		EC8502A330847990001CBEE2 /* Exceptions for "CellMate" folder in "CellMateWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				DesignSystem/Theme/AppColor.swift,
+				DesignSystem/Theme/ColorHex.swift,
+				DesignSystem/Theme/Spacing.swift,
+				Domain/Models/ChargeActivityAttributes.swift,
+			);
+			target = EC8502A430847990001CBEE2 /* CellMateWidgetsExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EC85024830847987001CBEE2 /* CellMate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EC8502A330847990001CBEE2 /* Exceptions for "CellMate" folder in "CellMateWidgetsExtension" target */,
+			);
 			path = CellMate;
 			sourceTree = "<group>";
 		};
@@ -43,6 +90,14 @@
 		EC85026030847988001CBEE2 /* CellMateUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = CellMateUITests;
+			sourceTree = "<group>";
+		};
+		EC8502A130847990001CBEE2 /* CellMateWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EC8502A230847990001CBEE2 /* Exceptions for "CellMateWidgets" folder in "CellMateWidgetsExtension" target */,
+			);
+			path = CellMateWidgets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -63,6 +118,11 @@
 			files = (
 			);
 		};
+		EC8502A630847990001CBEE2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -72,6 +132,7 @@
 				EC85024830847987001CBEE2 /* CellMate */,
 				EC85025630847988001CBEE2 /* CellMateTests */,
 				EC85026030847988001CBEE2 /* CellMateUITests */,
+				EC8502A130847990001CBEE2 /* CellMateWidgets */,
 				EC85024730847987001CBEE2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -82,6 +143,7 @@
 				EC85024630847987001CBEE2 /* CellMate.app */,
 				EC85025330847988001CBEE2 /* CellMateTests.xctest */,
 				EC85025D30847988001CBEE2 /* CellMateUITests.xctest */,
+				EC8502A030847990001CBEE2 /* CellMateWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -96,8 +158,12 @@
 				EC85024230847987001CBEE2 /* Sources */,
 				EC85024330847987001CBEE2 /* Frameworks */,
 				EC85024430847987001CBEE2 /* Resources */,
+				EC8502AC30847990001CBEE2 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				EC8502AE30847990001CBEE2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EC85024830847987001CBEE2 /* CellMate */,
@@ -149,6 +215,24 @@
 			productReference = EC85025D30847988001CBEE2 /* CellMateUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		EC8502A430847990001CBEE2 /* CellMateWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EC8502A830847990001CBEE2 /* Build configuration list for PBXNativeTarget "CellMateWidgetsExtension" */;
+			buildPhases = (
+				EC8502A530847990001CBEE2 /* Sources */,
+				EC8502A630847990001CBEE2 /* Frameworks */,
+				EC8502A730847990001CBEE2 /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				EC8502A130847990001CBEE2 /* CellMateWidgets */,
+			);
+			name = CellMateWidgetsExtension;
+			productName = CellMateWidgetsExtension;
+			productReference = EC8502A030847990001CBEE2 /* CellMateWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -170,6 +254,9 @@
 						CreatedOnToolsVersion = 27.1;
 						TestTargetID = EC85024530847987001CBEE2;
 					};
+					EC8502A430847990001CBEE2 = {
+						CreatedOnToolsVersion = 27.1;
+					};
 				};
 			};
 			buildConfigurationList = EC85024130847987001CBEE2 /* Build configuration list for PBXProject "CellMate" */;
@@ -189,6 +276,7 @@
 				EC85024530847987001CBEE2 /* CellMate */,
 				EC85025230847988001CBEE2 /* CellMateTests */,
 				EC85025C30847988001CBEE2 /* CellMateUITests */,
+				EC8502A430847990001CBEE2 /* CellMateWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -205,6 +293,11 @@
 			);
 		};
 		EC85025B30847988001CBEE2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		EC8502A730847990001CBEE2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
 			);
@@ -227,6 +320,11 @@
 			files = (
 			);
 		};
+		EC8502A530847990001CBEE2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -239,6 +337,11 @@
 			isa = PBXTargetDependency;
 			target = EC85024530847987001CBEE2 /* CellMate */;
 			targetProxy = EC85025E30847988001CBEE2 /* PBXContainerItemProxy */;
+		};
+		EC8502AE30847990001CBEE2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EC8502A430847990001CBEE2 /* CellMateWidgetsExtension */;
+			targetProxy = EC8502AD30847990001CBEE2 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -514,6 +617,62 @@
 			};
 			name = Release;
 		};
+		EC8502A930847990001CBEE2 /* Debug configuration for PBXNativeTarget "CellMateWidgetsExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CellMateWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CellMate;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diganta.CellMate.CellMateWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		EC8502AA30847990001CBEE2 /* Release configuration for PBXNativeTarget "CellMateWidgetsExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 47W4AWVQUK;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CellMateWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CellMate;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.diganta.CellMate.CellMateWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -546,6 +705,14 @@
 			buildConfigurations = (
 				EC85026C30847988001CBEE2 /* Debug configuration for PBXNativeTarget "CellMateUITests" */,
 				EC85026D30847988001CBEE2 /* Release configuration for PBXNativeTarget "CellMateUITests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		EC8502A830847990001CBEE2 /* Build configuration list for PBXNativeTarget "CellMateWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EC8502A930847990001CBEE2 /* Debug configuration for PBXNativeTarget "CellMateWidgetsExtension" */,
+				EC8502AA30847990001CBEE2 /* Release configuration for PBXNativeTarget "CellMateWidgetsExtension" */,
 			);
 			defaultConfigurationName = Release;
 		};
