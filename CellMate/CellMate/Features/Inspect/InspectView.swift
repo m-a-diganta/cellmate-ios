@@ -1,4 +1,4 @@
-import SwiftUI
+
 
 // Design: 11 Inspect, 12 Stop using
 import SwiftUI
@@ -9,10 +9,19 @@ import UIKit
 struct InspectView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.openURL) private var openURL
 
     @State private var viewModel: InspectionViewModel?
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var isLoadingPhoto = false
+    
+    @State private var showingPhotoChoices = false
+    @State private var showingPhotoLibrary = false
+    @State private var showingCamera = false
+
+    @State private var capturedPhotoData: Data?
+    @State private var cameraError: String?
+    @State private var offeringCameraSettings = false
 
     private let batteryName: String
     private let backTitle: String
@@ -125,6 +134,33 @@ struct InspectView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             finishSection(model)
         }
+        .photosPicker(
+            isPresented: $showingPhotoLibrary,
+            selection: $selectedPhoto,
+            matching: .images
+        )
+        .fullScreenCover(
+            isPresented: $showingCamera,
+            onDismiss: {
+                handleCameraDismissal(using: model)
+            }
+        ) {
+            InspectionCameraPicker(
+                onCapture: { data in
+                    capturedPhotoData = data
+                    showingCamera = false
+                },
+                onCancel: {
+                    showingCamera = false
+                },
+                onFailure: { message in
+                    cameraError = message
+                    showingCamera = false
+                }
+            )
+            .ignoresSafeArea()
+            .interactiveDismissDisabled()
+        }
         .task(id: selectedPhoto) {
             await importSelectedPhoto(into: model)
         }
@@ -139,7 +175,21 @@ struct InspectView: View {
                 }
             )
         ) {
+            if offeringCameraSettings {
+                Button("Open Settings") {
+                    offeringCameraSettings = false
+                    model.errorMessage = nil
+
+                    if let url = URL(
+                        string: UIApplication.openSettingsURLString
+                    ) {
+                        openURL(url)
+                    }
+                }
+            }
+
             Button("OK", role: .cancel) {
+                offeringCameraSettings = false
                 model.errorMessage = nil
             }
         } message: {
@@ -321,14 +371,32 @@ struct InspectView: View {
                         .accessibilityLabel("Attached inspection photo")
                 }
 
-                PhotosPicker(
-                    selection: $selectedPhoto,
-                    matching: .images,
-                    photoLibrary: .shared()
+                Button {
+                    showingPhotoChoices = true
+                } label: {
+                    Label(photoButtonTitle, systemImage: "camera")
+                        .padding(.horizontal, Spacing.sm)
+                        .padding(.vertical, Spacing.xs)
+                }
+                .buttonStyle(.appSecondary)
+                .disabled(!model.canAddPhoto || isLoadingPhoto)
+                .confirmationDialog(
+                    "Add inspection photo",
+                    isPresented: $showingPhotoChoices,
+                    titleVisibility: .visible
                 ) {
-                    Label(photoButtonTitle, systemImage: "photo")
-                    .padding(.horizontal, Spacing.sm)
-                    .padding(.vertical, Spacing.xs)
+                    Button("Take photo") {
+                        Task {
+                            await requestCamera(using: model)
+                        }
+                    }
+
+                    Button("Choose from library") {
+                        offeringCameraSettings = false
+                        showingPhotoLibrary = true
+                    }
+
+                    Button("Cancel", role: .cancel) {}
                 }
                 .buttonStyle(.appSecondary)
                 .disabled(!model.canAddPhoto || isLoadingPhoto)
@@ -450,6 +518,88 @@ struct InspectView: View {
         } catch {
             model.errorMessage =
                 "This photo could not be loaded. Please try again."
+        }
+    }
+    
+    private func requestCamera(
+        using model: InspectionViewModel
+    ) async {
+        guard model.canAddPhoto, !isLoadingPhoto else {
+            return
+        }
+
+        offeringCameraSettings = false
+        model.errorMessage = nil
+
+        guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+            model.errorMessage =
+                "A camera is not available on this device. "
+                + "Choose a photo from your library instead."
+            return
+        }
+
+        isLoadingPhoto = true
+
+        defer {
+            isLoadingPhoto = false
+        }
+
+        do {
+            let status = try await CameraPermissionService()
+                .requestAccessIfNeeded()
+
+            switch status {
+            case .authorized:
+                capturedPhotoData = nil
+                cameraError = nil
+                showingCamera = true
+
+            case .denied:
+                offeringCameraSettings = true
+                model.errorMessage =
+                    "Camera access is turned off. Enable it in Settings "
+                    + "or choose a photo from your library."
+
+            case .restricted:
+                model.errorMessage =
+                    "Camera access is restricted on this device. "
+                    + "You can continue without a photo."
+
+            case .notDetermined:
+                model.errorMessage =
+                    "Camera permission was not granted. "
+                    + "You can choose a photo from your library instead."
+            }
+        } catch {
+            model.errorMessage =
+                (error as? any LocalizedError)?.errorDescription
+                ?? "Camera access could not be requested."
+        }
+    }
+
+    private func handleCameraDismissal(
+        using model: InspectionViewModel
+    ) {
+        if let cameraError {
+            model.errorMessage = cameraError
+            self.cameraError = nil
+            capturedPhotoData = nil
+            return
+        }
+
+        guard let data = capturedPhotoData else {
+            return
+        }
+
+        capturedPhotoData = nil
+        isLoadingPhoto = true
+
+        Task {
+            defer {
+                isLoadingPhoto = false
+            }
+
+            await model.importPhoto(data: data)
         }
     }
 }
