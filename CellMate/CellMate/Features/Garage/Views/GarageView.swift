@@ -6,6 +6,8 @@ import SwiftUI
 
 @MainActor
 struct GarageView: View {
+    @Environment(\.scenePhase) private var scenePhase
+    
     @State private var viewModel: GarageViewModel
     @State private var activeSheet: GarageSheet?
     @State private var showingChargerRequired = false
@@ -89,6 +91,17 @@ struct GarageView: View {
                    viewModel.errorMessage == nil {
                     viewModel.errorMessage = photoStorageError
                     self.photoStorageError = nil
+                }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    Task {
+                        guard !viewModel.isBusy else {
+                            return
+                        }
+
+                        await viewModel.refreshInspectionStatuses()
+                    }
                 }
             }
             .sheet(item: $activeSheet) { sheet in
@@ -270,6 +283,8 @@ struct GarageView: View {
                 Text("Do not use or charge")
                     .font(.footnote)
                     .foregroundStyle(AppColor.textSecondary)
+            } else {
+                inspectionStatusRow(for: battery)
             }
         }
         .card()
@@ -626,6 +641,139 @@ struct GarageView: View {
             .padding(.bottom, Spacing.md)
         }
         .screenBackground()
+    }
+    
+    @ViewBuilder
+    private func inspectionStatusRow(
+        for battery: Battery
+    ) -> some View {
+        if let status = viewModel.inspectionStatuses[battery.id] {
+            switch status {
+            case .notRequired:
+                EmptyView()
+
+            case .neverInspected:
+                inspectionStatus(
+                    title: "Inspection due",
+                    icon: "checklist",
+                    detail: "No inspections yet",
+                    foreground: AppColor.mediumText,
+                    background: AppColor.mediumBackground
+                )
+
+            case .needsAttention:
+                inspectionStatus(
+                    title: "Needs attention",
+                    icon: "exclamationmark.triangle",
+                    detail: "Review the inspection",
+                    foreground: AppColor.highText,
+                    background: AppColor.highBackground
+                )
+
+            case .upToDate(let dueDate):
+                inspectionStatus(
+                    title: "Inspection current",
+                    icon: "calendar",
+                    detail: "Next check \(inspectionDate(dueDate))",
+                    foreground: AppColor.textSecondary,
+                    background: AppColor.background
+                )
+
+            case .dueSoon(let dueDate):
+                inspectionStatus(
+                    title: "Due soon",
+                    icon: "calendar.badge.clock",
+                    detail: "Inspect by \(inspectionDate(dueDate))",
+                    foreground: AppColor.mediumText,
+                    background: AppColor.mediumBackground
+                )
+
+            case .dueToday:
+                inspectionStatus(
+                    title: "Inspection due",
+                    icon: "calendar.badge.exclamationmark",
+                    detail: "Inspect today",
+                    foreground: AppColor.mediumText,
+                    background: AppColor.mediumBackground
+                )
+
+            case .overdue(let dueDate):
+                inspectionStatus(
+                    title: "Overdue",
+                    icon: "calendar.badge.exclamationmark",
+                    detail: "Due \(inspectionDate(dueDate))",
+                    foreground: AppColor.highText,
+                    background: AppColor.highBackground
+                )
+            }
+        } else {
+            Text("Inspection status unavailable")
+                .font(.footnote)
+                .foregroundStyle(AppColor.textSecondary)
+        }
+    }
+
+    private func inspectionStatus(
+        title: String,
+        icon: String,
+        detail: String,
+        foreground: Color,
+        background: Color
+    ) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: Spacing.sm) {
+                inspectionBadge(
+                    title: title,
+                    icon: icon,
+                    foreground: foreground,
+                    background: background
+                )
+
+                Spacer(minLength: Spacing.sm)
+
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(AppColor.textSecondary)
+                    .fixedSize(horizontal: true, vertical: false)
+            }
+
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                inspectionBadge(
+                    title: title,
+                    icon: icon,
+                    foreground: foreground,
+                    background: background
+                )
+
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(AppColor.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func inspectionBadge(
+        title: String,
+        icon: String,
+        foreground: Color,
+        background: Color
+    ) -> some View {
+        Label(title, systemImage: icon)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(foreground)
+            .padding(.horizontal, Spacing.sm)
+            .padding(.vertical, Spacing.xs)
+            .background(
+                background,
+                in: RoundedRectangle(cornerRadius: 6)
+            )
+    }
+
+    private func inspectionDate(_ date: Date) -> String {
+        date.formatted(
+            .dateTime.day().month(.abbreviated)
+        )
     }
 }
 
