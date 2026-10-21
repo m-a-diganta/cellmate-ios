@@ -11,6 +11,7 @@ struct GarageView: View {
     @State private var showingChargerRequired = false
     @State private var retirementReason = ""
     @State private var path = NavigationPath()
+    @State private var photoStorageError: String?
 
     @State private var inspectionSessions: [
         UUID: InspectionViewModel
@@ -43,9 +44,28 @@ struct GarageView: View {
     }
 
     init(repository: any GarageRepository) {
+        let photoStore: (any InspectionPhotoStoring)?
+        let storageError: String?
+
+        do {
+            photoStore = try LocalInspectionPhotoStore()
+            storageError = nil
+        } catch {
+            photoStore = nil
+            storageError =
+                "Photo storage could not be opened. "
+                + "You can still complete inspections without a photo. "
+                + "Try restarting the app."
+        }
+
         _viewModel = State(
-            initialValue: GarageViewModel(repository: repository)
+            initialValue: GarageViewModel(
+                repository: repository,
+                photoStore: photoStore
+            )
         )
+
+        _photoStorageError = State(initialValue: storageError)
     }
 
     var body: some View {
@@ -64,6 +84,12 @@ struct GarageView: View {
             .toolbar(.hidden, for: .navigationBar)
             .task {
                 await viewModel.load()
+
+                if let photoStorageError,
+                   viewModel.errorMessage == nil {
+                    viewModel.errorMessage = photoStorageError
+                    self.photoStorageError = nil
+                }
             }
             .sheet(item: $activeSheet) { sheet in
                 form(for: sheet)
