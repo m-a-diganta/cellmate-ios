@@ -9,12 +9,23 @@ struct GarageView: View {
     @State private var viewModel: GarageViewModel
     @State private var activeSheet: GarageSheet?
     @State private var showingChargerRequired = false
+    @State private var retirementReason = ""
 
-    private enum GarageSheet: String, Identifiable {
+    private enum GarageSheet: Identifiable {
         case addBattery
         case addCharger
+        case retireBattery(UUID)
 
-        var id: String { rawValue }
+        var id: String {
+            switch self {
+            case .addBattery:
+                return "addBattery"
+            case .addCharger:
+                return "addCharger"
+            case .retireBattery(let id):
+                return "retire-\(id.uuidString)"
+            }
+        }
     }
 
     init() {
@@ -34,6 +45,9 @@ struct GarageView: View {
                 content
             }
             .screenBackground()
+            .navigationDestination(for: UUID.self) { batteryID in
+                batteryDestination(for: batteryID)
+            }
             .toolbar(.hidden, for: .navigationBar)
             .task {
                 await viewModel.load()
@@ -63,12 +77,6 @@ struct GarageView: View {
             ) {
                 Button("OK", role: .cancel) {
                     viewModel.errorMessage = nil
-                }
-
-                Button("Retry") {
-                    Task {
-                        await viewModel.load()
-                    }
                 }
             } message: {
                 Text(viewModel.errorMessage ?? "")
@@ -177,7 +185,11 @@ struct GarageView: View {
             } else {
                 VStack(spacing: Spacing.sm) {
                     ForEach(viewModel.batteries) { battery in
-                        batteryRow(battery)
+                        NavigationLink(value: battery.id) {
+                            batteryRow(battery)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityHint("Opens battery details")
                     }
                 }
             }
@@ -201,7 +213,9 @@ struct GarageView: View {
                 title: battery.name,
                 subtitle: "\(battery.brand) · "
                     + "\(battery.capacityWh.formatted()) Wh"
-            )
+            ) {
+                RowChevron()
+            }
 
             if battery.isRetired {
                 Label("Retired", systemImage: "archivebox")
@@ -332,6 +346,9 @@ struct GarageView: View {
                             }
                         }
                     }
+                    
+                case .retireBattery(let batteryID):
+                    retirementForm(for: batteryID)
                 }
             }
             .disabled(viewModel.isSaving)
@@ -386,6 +403,91 @@ struct GarageView: View {
                 }
             }
         )
+    }
+    
+    @ViewBuilder
+    private func batteryDestination(for id: UUID) -> some View {
+        if let battery = viewModel.batteries.first(where: {
+            $0.id == id
+        }) {
+            BatteryDetailView(
+                battery: battery,
+                chargerName: viewModel.chargerName(for: battery),
+                onStartCharge: {
+                    viewModel.errorMessage =
+                        "Charging is not connected to Garage yet."
+                },
+                onInspect: {
+                    viewModel.errorMessage =
+                        "The inspection flow is not connected yet."
+                },
+                onRetire: {
+                    retirementReason = ""
+                    activeSheet = .retireBattery(id)
+                }
+            )
+        } else {
+            ContentUnavailableView(
+                "Battery unavailable",
+                systemImage: "battery.0",
+                description: Text(
+                    "Return to Garage and reload your records."
+                )
+            )
+            .screenBackground()
+        }
+    }
+    
+    private func retirementForm(for batteryID: UUID) -> some View {
+        Form {
+            Section {
+                TextField(
+                    "For example, no longer in use",
+                    text: $retirementReason,
+                    axis: .vertical
+                )
+                .lineLimit(3...6)
+                .accessibilityLabel("Retirement reason")
+            } header: {
+                Text("Reason")
+            } footer: {
+                Text(
+                    "The battery and its existing records will be kept."
+                )
+            }
+
+            Section {
+                Button("Retire battery", role: .destructive) {
+                    Task {
+                        let saved = await viewModel.retireBattery(
+                            id: batteryID,
+                            reason: retirementReason
+                        )
+
+                        if saved {
+                            activeSheet = nil
+                        }
+                    }
+                }
+                .disabled(
+                    retirementReason.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ).isEmpty
+                )
+            }
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .scrollContentBackground(.hidden)
+        .screenBackground()
+        .navigationTitle("Retire battery")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") {
+                    activeSheet = nil
+                }
+                .disabled(viewModel.isSaving)
+            }
+        }
     }
 }
 
