@@ -217,15 +217,24 @@ struct AddBatteryView: View {
 
     private var chargerDetails: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
-            Picker("Charger", selection: $selectedChargerID) {
-                Text("Select charger")
-                    .tag(nil as UUID?)
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    Text("Charger")
+                        .foregroundStyle(AppColor.textPrimary)
 
-                ForEach(chargers) { charger in
-                    Text(charger.name)
-                        .tag(Optional(charger.id))
+                    Spacer(minLength: Spacing.md)
+
+                    chargerPicker
+                }
+
+                VStack(alignment: .leading, spacing: Spacing.sm) {
+                    Text("Charger")
+                        .foregroundStyle(AppColor.textPrimary)
+
+                    chargerPicker
                 }
             }
+            .font(.body)
             .pickerStyle(.menu)
             .tint(AppColor.accent)
             .frame(minHeight: 44)
@@ -250,6 +259,48 @@ struct AddBatteryView: View {
                 cornerRadius: Radius.card,
                 style: .continuous
             )
+        )
+    }
+    
+    private var chargerPicker: some View {
+        Menu {
+            Button("Select charger") {
+                selectedChargerID = nil
+            }
+
+            ForEach(chargers) { charger in
+                Button {
+                    selectedChargerID = charger.id
+                } label: {
+                    if selectedChargerID == charger.id {
+                        Label(charger.name, systemImage: "checkmark")
+                    } else {
+                        Text(charger.name)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: Spacing.sm) {
+                Text(
+                    chargers.first(where: {
+                        $0.id == selectedChargerID
+                    })?.name ?? "Select charger"
+                )
+
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+            }
+            .foregroundStyle(AppColor.textSecondary)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(chargers.isEmpty)
+        .accessibilityLabel("Charger")
+        .accessibilityValue(
+            chargers.first(where: {
+                $0.id == selectedChargerID
+            })?.name ?? "None selected"
         )
     }
 
