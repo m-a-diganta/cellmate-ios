@@ -10,6 +10,16 @@ struct GarageView: View {
     @State private var activeSheet: GarageSheet?
     @State private var showingChargerRequired = false
     @State private var retirementReason = ""
+    @State private var path = NavigationPath()
+
+    @State private var inspectionSessions: [
+        UUID: InspectionViewModel
+    ] = [:]
+
+    private enum InspectionRoute: Hashable {
+        case checklist(UUID)
+        case stopUsing(UUID)
+    }
 
     private enum GarageSheet: Identifiable {
         case addBattery
@@ -39,7 +49,7 @@ struct GarageView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack (path: $path){
             VStack(spacing: 0) {
                 header
                 content
@@ -47,6 +57,9 @@ struct GarageView: View {
             .screenBackground()
             .navigationDestination(for: UUID.self) { batteryID in
                 batteryDestination(for: batteryID)
+            }
+            .navigationDestination(for: InspectionRoute.self) { route in
+                inspectionDestination(for: route)
             }
             .toolbar(.hidden, for: .navigationBar)
             .task {
@@ -413,19 +426,22 @@ struct GarageView: View {
             BatteryDetailView(
                 battery: battery,
                 chargerName: viewModel.chargerName(for: battery),
+                lastInspectionText: viewModel.inspectionSummaries[id],
                 onStartCharge: {
                     viewModel.errorMessage =
                         "Charging is not connected to Garage yet."
                 },
                 onInspect: {
-                    viewModel.errorMessage =
-                        "The inspection flow is not connected yet."
+                    openInspection(for: id)
                 },
                 onRetire: {
                     retirementReason = ""
                     activeSheet = .retireBattery(id)
                 }
             )
+            .task {
+                await viewModel.loadInspectionSummary(for: id)
+            }
         } else {
             ContentUnavailableView(
                 "Battery unavailable",
@@ -488,6 +504,102 @@ struct GarageView: View {
                 .disabled(viewModel.isSaving)
             }
         }
+    }
+    
+    private func openInspection(for batteryID: UUID) {
+        let sessionID = UUID()
+
+        inspectionSessions[sessionID] =
+            viewModel.makeInspectionViewModel(for: batteryID)
+
+        path.append(InspectionRoute.checklist(sessionID))
+    }
+
+    @ViewBuilder
+    private func inspectionDestination(
+        for route: InspectionRoute
+    ) -> some View {
+        switch route {
+        case .checklist(let sessionID):
+            if let model = inspectionSessions[sessionID],
+               let battery = viewModel.batteries.first(where: {
+                   $0.id == model.batteryID
+               }) {
+                InspectView(
+                    batteryName: battery.name,
+                    viewModel: model,
+                    backTitle: "Battery",
+                    onFinish: { inspection in
+                        viewModel.inspectionDidSave(inspection)
+
+                        if inspection.result == .fail ||
+                            inspection.hasReportedProblem {
+                            path.append(
+                                InspectionRoute.stopUsing(sessionID)
+                            )
+                        } else {
+                            // Return to Battery detail after a successful save.
+                            if !path.isEmpty {
+                                path.removeLast()
+                            }
+                        }
+                    }
+                )
+            } else {
+                inspectionUnavailable
+            }
+
+        case .stopUsing(let sessionID):
+            if let model = inspectionSessions[sessionID],
+               let inspection = model.savedInspection,
+               let battery = viewModel.batteries.first(where: {
+                   $0.id == model.batteryID
+               }) {
+                StopUsingView(
+                    batteryName: battery.name,
+                    reportedProblems: inspection.items
+                        .filter { $0.finding == .problem }
+                        .map(\.kind),
+                    isRetired: battery.isRetired,
+                    onRetire: {
+                        let problems = inspection.items
+                            .filter { $0.finding == .problem }
+                            .map { $0.kind.rawValue }
+                            .joined(separator: ", ")
+
+                        retirementReason = problems.isEmpty
+                            ? "Problem reported during inspection"
+                            : "Inspection reported: \(problems)"
+
+                        activeSheet = .retireBattery(battery.id)
+                    }
+                )
+            } else {
+                inspectionUnavailable
+            }
+        }
+    }
+
+    private var inspectionUnavailable: some View {
+        VStack(spacing: Spacing.md) {
+            ContentUnavailableView(
+                "Inspection unavailable",
+                systemImage: "checklist",
+                description: Text(
+                    "Return to the battery and start a new inspection."
+                )
+            )
+
+            Button("Back") {
+                if !path.isEmpty {
+                    path.removeLast()
+                }
+            }
+            .buttonStyle(.appSecondary)
+            .padding(.horizontal, Spacing.md)
+            .padding(.bottom, Spacing.md)
+        }
+        .screenBackground()
     }
 }
 
