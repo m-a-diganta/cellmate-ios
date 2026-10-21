@@ -30,20 +30,35 @@ final class GarageViewModel {
     
     @ObservationIgnored
     private let retireBattery: RetireBattery
+    
+    @ObservationIgnored
+    private let inspectionRepository: any InspectionRepository
+
+    private(set) var inspectionSummaries: [UUID: String] = [:]
 
     var isBusy: Bool {
         isLoading || isSaving
     }
 
-    init(repository: any GarageRepository) {
+    init(
+        repository: any GarageRepository,
+        inspectionRepository: (any InspectionRepository)? = nil
+    ) {
         self.repository = repository
-        
+
+        self.inspectionRepository = inspectionRepository
+            ?? InMemoryInspectionRepository(
+                garageRepository: repository
+            )
+
         self.registerBattery = RegisterBattery(
             repository: repository
         )
+
         self.registerCharger = RegisterCharger(
             repository: repository
         )
+
         self.retireBattery = RetireBattery(
             repository: repository
         )
@@ -190,5 +205,69 @@ final class GarageViewModel {
         }
 
         return description
+    }
+    
+    /// Creates a fresh checklist for each new inspection.
+    func makeInspectionViewModel(
+        for batteryID: UUID
+    ) -> InspectionViewModel {
+        InspectionViewModel(
+            batteryID: batteryID,
+            logInspection: LogInspection(
+                garageRepository: repository,
+                inspectionRepository: inspectionRepository
+            )
+        )
+    }
+
+    /// Loads the latest inspection description for Battery detail.
+    func loadInspectionSummary(for batteryID: UUID) async {
+        do {
+            let inspections = try await inspectionRepository.fetchInspections(
+                for: batteryID
+            )
+
+            try Task.checkCancellation()
+
+            if let latest = inspections.first {
+                inspectionSummaries[batteryID] = summaryText(for: latest)
+            } else {
+                inspectionSummaries[batteryID] = "No inspections yet"
+            }
+        } catch is CancellationError {
+            return
+        } catch {
+            errorMessage = message(
+                for: error,
+                fallback: "The last inspection could not be loaded."
+            )
+        }
+    }
+
+    /// Call with the saved result returned by InspectionViewModel.save().
+    func inspectionDidSave(_ inspection: Inspection) {
+        inspectionSummaries[inspection.batteryID] = summaryText(
+            for: inspection
+        )
+    }
+
+    private func summaryText(for inspection: Inspection) -> String {
+        let date = inspection.inspectedAt.formatted(
+            date: .abbreviated,
+            time: .omitted
+        )
+
+        let resultText: String
+
+        switch inspection.result {
+        case .pass:
+            resultText = "No problems reported"
+        case .caution:
+            resultText = "Caution recorded"
+        case .fail:
+            resultText = "Problem reported"
+        }
+
+        return "\(date) · \(resultText)"
     }
 }
