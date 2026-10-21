@@ -18,7 +18,10 @@ final class InspectionViewModel {
     ] = [:]
 
     private(set) var photo: Inspection.PhotoEvidence?
+    private(set) var photoData: Data?
+
     private(set) var isSaving = false
+    private(set) var isProcessingPhoto = false
     private(set) var savedInspection: Inspection?
 
     var errorMessage: String?
@@ -26,12 +29,20 @@ final class InspectionViewModel {
     @ObservationIgnored
     private let logInspection: LogInspection
 
+    @ObservationIgnored
+    private let photoStore: (any InspectionPhotoStoring)?
+
+    @ObservationIgnored
+    private var pendingPhotoDeletion: Set<String> = []
+
     init(
         batteryID: UUID,
-        logInspection: LogInspection
+        logInspection: LogInspection,
+        photoStore: (any InspectionPhotoStoring)? = nil
     ) {
         self.batteryID = batteryID
         self.logInspection = logInspection
+        self.photoStore = photoStore
     }
 
     var answeredCount: Int {
@@ -48,8 +59,16 @@ final class InspectionViewModel {
         findings.values.contains(.problem)
     }
 
+    var isBusy: Bool {
+        isSaving || isProcessingPhoto
+    }
+
     var canSave: Bool {
-        isComplete && !isSaving && savedInspection == nil
+        isComplete && !isBusy && savedInspection == nil
+    }
+
+    var canAddPhoto: Bool {
+        photoStore != nil && !isBusy && savedInspection == nil
     }
 
     func finding(
@@ -62,7 +81,7 @@ final class InspectionViewModel {
         _ finding: Inspection.Item.Finding,
         for kind: Inspection.Item.Kind
     ) {
-        guard !isSaving, savedInspection == nil else {
+        guard !isBusy, savedInspection == nil else {
             return
         }
 
@@ -70,33 +89,130 @@ final class InspectionViewModel {
         errorMessage = nil
     }
 
-    /// Call only after the photo service has saved the image file.
-    func attachPhoto(_ evidence: Inspection.PhotoEvidence) {
-        guard !isSaving, savedInspection == nil else {
+    /// Saves an imported image and loads its resized preview.
+    /// Keeps the previous attachment if importing fails.
+    func importPhoto(data: Data) async {
+        guard canAddPhoto, let photoStore else {
             return
         }
 
-        photo = evidence
+        isProcessingPhoto = true
         errorMessage = nil
+
+        defer {
+            isProcessingPhoto = false
+        }
+
+        do {
+            try await deletePendingPhotos()
+
+            let evidence = try await photoStore.savePhoto(
+                imageData: data
+            )
+
+            // Track the file until it becomes the attached photo.
+            pendingPhotoDeletion.insert(evidence.filename)
+
+            let preview = try await photoStore.loadPhoto(
+                filename: evidence.filename
+            )
+
+            if let previous = photo {
+                pendingPhotoDeletion.insert(previous.filename)
+            }
+
+            photo = evidence
+            photoData = preview
+            pendingPhotoDeletion.remove(evidence.filename)
+
+            try await deletePendingPhotos()
+        } catch {
+            // Keep failed cleanup entries so they can be retried.
+            errorMessage = message(
+                for: error,
+                fallback: "The photo could not be prepared. Please try again."
+            )
+        }
     }
 
-    /// Removes the reference from this draft.
-    /// The photo service handles deleting the unused file.
-    func removePhoto() {
-        guard !isSaving, savedInspection == nil else {
+    func removePhoto() async {
+        guard !isBusy,
+              savedInspection == nil,
+              let photoStore else {
             return
         }
 
-        photo = nil
+        isProcessingPhoto = true
+        errorMessage = nil
+
+        defer {
+            isProcessingPhoto = false
+        }
+
+        do {
+            try await deletePendingPhotos()
+
+            if let photo {
+                try await photoStore.deletePhoto(
+                    filename: photo.filename
+                )
+            }
+
+            photo = nil
+            photoData = nil
+        } catch {
+            errorMessage = message(
+                for: error,
+                fallback: "The photo could not be removed. Please try again."
+            )
+        }
+    }
+
+    /// Call before leaving an unsaved inspection.
+    /// Saved inspection photos are never deleted here.
+    func discardDraft() async -> Bool {
+        guard !isBusy else {
+            return false
+        }
+
+        guard savedInspection == nil else {
+            return true
+        }
+
+        isProcessingPhoto = true
+        errorMessage = nil
+
+        defer {
+            isProcessingPhoto = false
+        }
+
+        do {
+            try await deletePendingPhotos()
+
+            if let photo, let photoStore {
+                try await photoStore.deletePhoto(
+                    filename: photo.filename
+                )
+            }
+
+            photo = nil
+            photoData = nil
+            return true
+        } catch {
+            errorMessage = message(
+                for: error,
+                fallback: "The draft photo could not be removed. Please try again."
+            )
+            return false
+        }
     }
 
     /// Returns the saved inspection, or nil when saving fails.
     func save() async -> Inspection? {
-        guard !isSaving else {
+        guard !isBusy else {
             return nil
         }
 
-        // A completed draft must not create another record.
         if let savedInspection {
             return savedInspection
         }
@@ -124,14 +240,16 @@ final class InspectionViewModel {
             )
         }
 
-        let photos = photo.map { [$0] } ?? []
-
         do {
+            // Remove replaced or failed-import files before committing
+            // the inspection's current photo reference.
+            try await deletePendingPhotos()
+
             let inspection = try await logInspection.execute(
                 LogInspection.Input(
                     batteryID: batteryID,
                     items: items,
-                    photos: photos
+                    photos: photo.map { [$0] } ?? []
                 )
             )
 
@@ -140,11 +258,31 @@ final class InspectionViewModel {
         } catch is CancellationError {
             return nil
         } catch {
-            errorMessage =
-                (error as? any LocalizedError)?.errorDescription
-                ?? "The inspection could not be saved. Please try again."
-
+            errorMessage = message(
+                for: error,
+                fallback: "The inspection could not be saved. Please try again."
+            )
             return nil
         }
+    }
+
+    private func deletePendingPhotos() async throws {
+        guard let photoStore else {
+            return
+        }
+
+        // Work from a snapshot because successful deletions
+        // remove entries from the original set.
+        for filename in Array(pendingPhotoDeletion) {
+            try await photoStore.deletePhoto(filename: filename)
+            pendingPhotoDeletion.remove(filename)
+        }
+    }
+
+    private func message(
+        for error: any Error,
+        fallback: String
+    ) -> String {
+        (error as? any LocalizedError)?.errorDescription ?? fallback
     }
 }
