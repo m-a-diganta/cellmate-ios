@@ -12,18 +12,19 @@ struct GarageView: View {
     @State private var activeSheet: GarageSheet?
     @State private var showingChargerRequired = false
     @State private var retirementReason = ""
-    @State private var path = NavigationPath()
+    @State private var path: [GarageRoute] = []
     @State private var photoStorageError: String?
 
     @State private var inspectionSessions: [
         UUID: InspectionViewModel
     ] = [:]
 
-    private enum InspectionRoute: Hashable {
+    private enum GarageRoute: Hashable {
+        case battery(UUID)
         case checklist(UUID)
         case stopUsing(UUID)
     }
-
+    
     private enum GarageSheet: Identifiable {
         case addBattery
         case addCharger
@@ -77,11 +78,16 @@ struct GarageView: View {
                 content
             }
             .screenBackground()
-            .navigationDestination(for: UUID.self) { batteryID in
-                batteryDestination(for: batteryID)
-            }
-            .navigationDestination(for: InspectionRoute.self) { route in
+            .navigationDestination(for: GarageRoute.self) { route in
                 inspectionDestination(for: route)
+            }
+            .navigationDestination(for: GarageRoute.self) { route in
+                inspectionDestination(for: route)
+            }
+            .onChange(of: path) { _, _ in
+                Task {
+                    await releaseUnusedInspectionSessions()
+                }
             }
             .toolbar(.hidden, for: .navigationBar)
             .task {
@@ -96,6 +102,7 @@ struct GarageView: View {
             .onChange(of: scenePhase) { _, phase in
                 if phase == .active {
                     Task {
+                        await releaseUnusedInspectionSessions()
                         guard !viewModel.isBusy else {
                             return
                         }
@@ -237,7 +244,7 @@ struct GarageView: View {
             } else {
                 VStack(spacing: Spacing.sm) {
                     ForEach(viewModel.batteries) { battery in
-                        NavigationLink(value: battery.id) {
+                        NavigationLink(value: GarageRoute.battery(battery.id)) {
                             batteryRow(battery)
                         }
                         .buttonStyle(.plain)
@@ -553,14 +560,17 @@ struct GarageView: View {
         inspectionSessions[sessionID] =
             viewModel.makeInspectionViewModel(for: batteryID)
 
-        path.append(InspectionRoute.checklist(sessionID))
+        path.append(GarageRoute.checklist(sessionID))
     }
 
     @ViewBuilder
     private func inspectionDestination(
-        for route: InspectionRoute
+        for route: GarageRoute
     ) -> some View {
         switch route {
+        case .battery(let batteryID):
+            batteryDestination(for: batteryID)
+            
         case .checklist(let sessionID):
             if let model = inspectionSessions[sessionID],
                let battery = viewModel.batteries.first(where: {
@@ -576,7 +586,7 @@ struct GarageView: View {
                         if inspection.result == .fail ||
                             inspection.hasReportedProblem {
                             path.append(
-                                InspectionRoute.stopUsing(sessionID)
+                                GarageRoute.stopUsing(sessionID)
                             )
                         } else {
                             // Return to Battery detail after a successful save.
@@ -774,6 +784,53 @@ struct GarageView: View {
         date.formatted(
             .dateTime.day().month(.abbreviated)
         )
+    }
+    
+    private var activeInspectionSessionIDs: Set<UUID> {
+        Set(
+            path.compactMap { route -> UUID? in
+                switch route {
+                case .battery:
+                    return nil
+
+                case .checklist(let sessionID),
+                     .stopUsing(let sessionID):
+                    return sessionID
+                }
+            }
+        )
+    }
+
+    private func releaseUnusedInspectionSessions() async {
+        let unusedIDs = Set(inspectionSessions.keys)
+            .subtracting(activeInspectionSessionIDs)
+
+        for sessionID in unusedIDs {
+            guard !activeInspectionSessionIDs.contains(sessionID),
+                  let model = inspectionSessions[sessionID] else {
+                continue
+            }
+
+            // Keep busy sessions until a later cleanup attempt.
+            guard !model.isBusy else {
+                continue
+            }
+
+            let cleanedUp = await model.discardDraft()
+
+            guard cleanedUp else {
+                viewModel.errorMessage = model.errorMessage
+                    ?? "An unused inspection photo could not be removed."
+                continue
+            }
+
+            // Navigation may have changed while cleanup was running.
+            guard !activeInspectionSessionIDs.contains(sessionID) else {
+                continue
+            }
+
+            inspectionSessions.removeValue(forKey: sessionID)
+        }
     }
 }
 
