@@ -14,6 +14,12 @@ enum BedtimeSetting {
         return (parts.hour ?? 0) * 60 + (parts.minute ?? 0)
     }
 
+    /// The bedtime saved in Settings, as a time today.
+    static func current(defaults: UserDefaults = .standard) -> Date {
+        let saved = defaults.object(forKey: AppStorageKey.bedtimeMinutes) as? Int
+        return date(fromMinutes: saved ?? defaultMinutes)
+    }
+
     static func displayText(minutes: Int) -> String {
         date(fromMinutes: minutes).formatted(date: .omitted, time: .shortened)
     }

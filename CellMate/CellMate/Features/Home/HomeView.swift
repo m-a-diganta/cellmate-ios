@@ -8,12 +8,17 @@ enum HomeRoute: Hashable {
 }
 
 // Design: 05 Home (Not on Charge and On Charge), 20 Home dark
+@MainActor
 struct HomeView: View {
     @Environment(AppRouter.self) private var router
     @State private var viewModel: HomeViewModel
     @State private var path: [HomeRoute] = []
 
-    init(viewModel: HomeViewModel = HomeViewModel(provider: MockHomeSummaryProvider())) {
+    init() {
+        self.init(viewModel: HomeViewModel(provider: AppContainer.shared.homeSummaryProvider))
+    }
+
+    init(viewModel: HomeViewModel) {
         _viewModel = State(initialValue: viewModel)
     }
 
@@ -53,17 +58,26 @@ struct HomeView: View {
                 destination(for: route)
             }
             .task { await viewModel.load() }
+            .onChange(of: path) { _, newPath in
+                if newPath.isEmpty {
+                    Task { await viewModel.load() }
+                }
+            }
         }
     }
 
-    // Replace the placeholders below with the real screens when they exist.
     @ViewBuilder
     private func destination(for route: HomeRoute) -> some View {
         switch route {
-        case .settings: SettingsView()
-        case .startCharge: StartChargeView()
-        case .charging: PlaceholderScreen(title: "Charging")
-        case .inspect: InspectView()
+        case .settings:
+            SettingsView()
+        case .startCharge, .charging:
+            // One flow decides what to show: the form, the countdown or the result.
+            ChargeFlowView(viewModel: AppContainer.shared.chargeViewModel) {
+                path.removeAll()
+            }
+        case .inspect:
+            InspectView()
         }
     }
 

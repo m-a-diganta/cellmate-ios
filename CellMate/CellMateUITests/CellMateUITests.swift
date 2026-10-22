@@ -14,6 +14,8 @@ final class CellMateUITests: XCTestCase {
         app.launch()
 
         app.buttons["Get started"].tap()
+        // The Permissions screen comes next. "Not now" skips it without a system prompt.
+        app.buttons["Not now"].tap()
 
         XCTAssertTrue(app.tabBars.buttons["Home"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.tabBars.buttons["Garage"].exists)
