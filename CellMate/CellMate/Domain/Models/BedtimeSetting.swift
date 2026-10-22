@@ -2,7 +2,8 @@ import Foundation
 
 /// Bedtime is stored as minutes after midnight (10:30 pm = 1350).
 /// The risk rules and the alerts read this value.
-enum BedtimeSetting {
+/// `nonisolated` so default arguments and any thread can use it.
+nonisolated enum BedtimeSetting {
     static let defaultMinutes = 22 * 60 + 30
 
     static func date(fromMinutes minutes: Int, on day: Date = Date(), calendar: Calendar = .current) -> Date {

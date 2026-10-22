@@ -111,7 +111,11 @@ final class HistoryAndHomeDataTests: XCTestCase {
         let garage = InMemoryGarageRepository(batteries: [battery], chargers: [charger])
         let charges = InMemoryChargeRepository(sessions: [makeSession(battery: battery, start: Date())])
 
-        let summary = await LiveHomeSummaryProvider(garage: garage, charges: charges).loadSummary()
+        let summary = await LiveHomeSummaryProvider(
+            garage: garage,
+            charges: charges,
+            inspections: InMemoryInspectionRepository(garageRepository: garage)
+        ).loadSummary()
 
         XCTAssertTrue(summary.isCharging)
         XCTAssertEqual(summary.batteries.count, 1)
@@ -125,10 +129,45 @@ final class HistoryAndHomeDataTests: XCTestCase {
             makeSession(battery: active, start: Date().addingTimeInterval(-7200), end: Date().addingTimeInterval(-3600), level: .medium)
         ])
 
-        let summary = await LiveHomeSummaryProvider(garage: garage, charges: charges).loadSummary()
+        let summary = await LiveHomeSummaryProvider(
+            garage: garage,
+            charges: charges,
+            inspections: InMemoryInspectionRepository(garageRepository: garage)
+        ).loadSummary()
 
         XCTAssertFalse(summary.isCharging)
         XCTAssertEqual(summary.batteries.map(\.name), ["Active pack"])
         XCTAssertEqual(summary.batteries.first?.risk, .medium)
+    }
+
+    func testHomeAsksForAFirstCheckWhenABatteryWasNeverInspected() async {
+        let battery = makeBattery()
+        let garage = InMemoryGarageRepository(batteries: [battery], chargers: [charger])
+
+        let summary = await LiveHomeSummaryProvider(
+            garage: garage,
+            charges: InMemoryChargeRepository(),
+            inspections: InMemoryInspectionRepository(garageRepository: garage)
+        ).loadSummary()
+
+        XCTAssertEqual(summary.attention.count, 1)
+        XCTAssertTrue(summary.attention[0].title.contains("first check needed"))
+    }
+
+    func testHomeFlagsNothingAfterARecentPassingInspection() async {
+        let battery = makeBattery()
+        let garage = InMemoryGarageRepository(batteries: [battery], chargers: [charger])
+        let inspections = InMemoryInspectionRepository(
+            garageRepository: garage,
+            inspections: [makeInspection(battery: battery, at: Date().addingTimeInterval(-86_400), result: .pass)]
+        )
+
+        let summary = await LiveHomeSummaryProvider(
+            garage: garage,
+            charges: InMemoryChargeRepository(),
+            inspections: inspections
+        ).loadSummary()
+
+        XCTAssertTrue(summary.attention.isEmpty)
     }
 }

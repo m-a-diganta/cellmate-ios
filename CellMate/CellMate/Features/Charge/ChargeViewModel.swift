@@ -102,8 +102,10 @@ final class ChargeViewModel: ObservableObject {
         batteries = (try? await garageRepository.fetchBatteries()) ?? []
         chargers = (try? await garageRepository.fetchChargers()) ?? []
 
-        let stillAvailable = availableBatteries.contains { $0.id == selectedBatteryID }
-        if !stillAvailable {
+        if let chosen = availableBatteries.first(where: { $0.id == selectedBatteryID }) {
+            // Keep a battery chosen earlier (for example from Garage) and make sure its charger is set too.
+            if selectedChargerID == nil { selectedChargerID = chosen.chargerID }
+        } else {
             selectBattery(availableBatteries.first?.id)
         }
         recomputeLiveRisk()

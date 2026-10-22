@@ -26,13 +26,20 @@ final class AppContainer {
         self.garage = garage
         self.charges = InMemoryChargeRepository()
         self.inspections = InMemoryInspectionRepository(garageRepository: garage)
-        self.notifications = NoOpNotificationScheduler()
+        self.notifications = ChargeAlertScheduler()
         self.activity = SystemChargeActivityService()
     }
 
     var homeSummaryProvider: any HomeSummaryProviding {
-        LiveHomeSummaryProvider(garage: garage, charges: charges)
+        LiveHomeSummaryProvider(garage: garage, charges: charges, inspections: inspections)
     }
+
+    /// Ask reads the Garage and saves its results as inspections. Built once.
+    private(set) lazy var askDependencies: AskDependencies = AskDependencies(
+        assistant: FoundationBatteryAssistant(),
+        batteries: GarageAskBatteryProvider(garage: garage),
+        inspections: InspectionAskLogger(inspections: inspections)
+    )
 
     func makeHistoryViewModel() -> HistoryViewModel {
         HistoryViewModel(

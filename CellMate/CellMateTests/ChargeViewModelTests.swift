@@ -76,4 +76,17 @@ final class ChargeViewModelTests: XCTestCase {
         XCTAssertNotNil(viewModel.errorMessage)
         XCTAssertNil(charges.anyRunningSession())
     }
+
+    func testBatteryChosenBeforeLoadKeepsItsCharger() async {
+        let (viewModel, _, battery, charger) = makeViewModel()
+        // This is what tapping "Start charge" on a battery in Garage does.
+        viewModel.selectBattery(battery.id)
+        XCTAssertNil(viewModel.selectedChargerID)
+
+        await viewModel.load()
+
+        XCTAssertEqual(viewModel.selectedBatteryID, battery.id)
+        XCTAssertEqual(viewModel.selectedChargerID, charger.id)
+        XCTAssertTrue(viewModel.chargerMatchesSelectedBattery)
+    }
 }
