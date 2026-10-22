@@ -59,7 +59,7 @@ final class HomeFormattersTests: XCTestCase {
 @MainActor
 final class HomeViewModelTests: XCTestCase {
 
-    func testStartsEmpty() {
+    func testStartsEmpty() async {
         let viewModel = HomeViewModel(provider: MockHomeSummaryProvider(scenario: .charging))
         XCTAssertFalse(viewModel.summary.isCharging)
         XCTAssertTrue(viewModel.summary.batteries.isEmpty)
