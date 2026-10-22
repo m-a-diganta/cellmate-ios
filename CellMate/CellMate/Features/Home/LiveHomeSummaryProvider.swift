@@ -1,10 +1,10 @@
 import Foundation
 
 /// Builds the Home summary from the real repositories.
-/// "Needs attention" stays empty until the inspection data is shared with Home.
 struct LiveHomeSummaryProvider: HomeSummaryProviding {
     let garage: any GarageRepository
     let charges: any ChargeRepository
+    var inspections: (any InspectionRepository)? = nil
 
     func loadSummary() async -> HomeSummary {
         let batteries = (try? await garage.fetchBatteries()) ?? []
@@ -29,17 +29,49 @@ struct LiveHomeSummaryProvider: HomeSummaryProviding {
             chargeState = .idle(lastCharge: nil)
         }
 
-        let summaries = batteries
-            .filter { !$0.isRetired }
-            .map { battery in
-                BatterySummary(
-                    name: battery.name,
-                    detail: "\(battery.brand) · \(Int(battery.capacityWh)) Wh",
-                    risk: latestRisk(for: battery.id, in: sessions)
-                )
-            }
+        let activeBatteries = batteries.filter { !$0.isRetired }
 
-        return HomeSummary(chargeState: chargeState, attention: [], batteries: summaries)
+        let evaluateDue = EvaluateInspectionDue()
+        var attention: [AttentionItem] = []
+        for battery in activeBatteries {
+            guard let inspections else { break }
+            let latest = (try? await inspections.fetchInspections(for: battery.id))?.first
+            guard let status = try? evaluateDue.execute(battery: battery, latestInspection: latest),
+                  let item = Self.attentionItem(for: battery, status: status) else { continue }
+            attention.append(item)
+        }
+
+        let summaries = activeBatteries.map { battery in
+            BatterySummary(
+                name: battery.name,
+                detail: "\(battery.brand) · \(Int(battery.capacityWh)) Wh",
+                risk: latestRisk(for: battery.id, in: sessions)
+            )
+        }
+
+        return HomeSummary(chargeState: chargeState, attention: attention, batteries: summaries)
+    }
+
+    /// What Home says about a battery whose check needs doing. Nil when it needs nothing.
+    static func attentionItem(for battery: Battery, status: EvaluateInspectionDue.Status) -> AttentionItem? {
+        switch status {
+        case .notRequired, .upToDate:
+            return nil
+        case .neverInspected:
+            return AttentionItem(title: "\(battery.name) · first check needed", subtitle: "Not inspected yet")
+        case .needsAttention:
+            return AttentionItem(title: "\(battery.name) · needs attention", subtitle: "The last check reported a problem")
+        case .overdue(let due):
+            return AttentionItem(title: "\(battery.name) · check overdue", subtitle: "Was due \(shortDate(due))")
+        case .dueToday:
+            return AttentionItem(title: "\(battery.name) · check due today", subtitle: "Do a quick inspection")
+        case .dueSoon(let due):
+            return AttentionItem(title: "\(battery.name) · check due soon", subtitle: "Check by \(shortDate(due))")
+        }
+    }
+
+    private static func shortDate(_ date: Date) -> String {
+        date.formatted(.dateTime.day().month(.abbreviated))
     }
 
     /// The risk of the battery's most recent completed charge, or low when it has none.

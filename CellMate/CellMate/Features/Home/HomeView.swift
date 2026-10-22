@@ -4,7 +4,6 @@ enum HomeRoute: Hashable {
     case settings
     case startCharge
     case charging
-    case inspect
 }
 
 // Design: 05 Home (Not on Charge and On Charge), 20 Home dark
@@ -33,7 +32,7 @@ struct HomeView: View {
                     QuickActionsRow(
                         isCharging: summary.isCharging,
                         onChargeAction: { path.append(summary.isCharging ? .charging : .startCharge) },
-                        onInspect: { path.append(.inspect) },
+                        onInspect: { router.selectedTab = .garage },
                         onAsk: { router.selectedTab = .ask }
                     )
 
@@ -76,8 +75,6 @@ struct HomeView: View {
             ChargeFlowView(viewModel: AppContainer.shared.chargeViewModel) {
                 path.removeAll()
             }
-        case .inspect:
-            InspectView()
         }
     }
 
@@ -92,7 +89,7 @@ struct HomeView: View {
                 } else {
                     ForEach(summary.attention) { item in
                         Button {
-                            path.append(.inspect)
+                            router.selectedTab = .garage
                         } label: {
                             IconRow(icon: "calendar.badge.clock", title: item.title, subtitle: item.subtitle, showsTile: false) {
                                 RowChevron()

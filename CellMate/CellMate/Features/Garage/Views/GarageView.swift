@@ -23,7 +23,11 @@ struct GarageView: View {
         case battery(UUID)
         case checklist(UUID)
         case stopUsing(UUID)
+        case charge(UUID)
     }
+
+    /// The shared charge flow. Nil keeps the old "not connected" message.
+    private let chargeViewModel: ChargeViewModel?
     
     private enum GarageSheet: Identifiable {
         case addBattery
@@ -46,7 +50,13 @@ struct GarageView: View {
         self.init(repository: InMemoryGarageRepository())
     }
 
-    init(repository: any GarageRepository) {
+    init(
+        repository: any GarageRepository,
+        inspectionRepository: (any InspectionRepository)? = nil,
+        chargeViewModel: ChargeViewModel? = nil
+    ) {
+        self.chargeViewModel = chargeViewModel
+
         let photoStore: (any InspectionPhotoStoring)?
         let storageError: String?
 
@@ -64,6 +74,7 @@ struct GarageView: View {
         _viewModel = State(
             initialValue: GarageViewModel(
                 repository: repository,
+                inspectionRepository: inspectionRepository,
                 photoStore: photoStore
             )
         )
@@ -476,8 +487,15 @@ struct GarageView: View {
                 chargerName: viewModel.chargerName(for: battery),
                 lastInspectionText: viewModel.inspectionSummaries[id],
                 onStartCharge: {
-                    viewModel.errorMessage =
-                        "Charging is not connected to Garage yet."
+                    guard let chargeViewModel else {
+                        viewModel.errorMessage =
+                            "Charging is not connected to Garage yet."
+                        return
+                    }
+
+                    // Pick this battery in the shared charge flow, then open it.
+                    chargeViewModel.selectBattery(id)
+                    path.append(GarageRoute.charge(id))
                 },
                 onInspect: {
                     openInspection(for: id)
@@ -596,6 +614,16 @@ struct GarageView: View {
                         }
                     }
                 )
+            } else {
+                inspectionUnavailable
+            }
+
+        case .charge:
+            if let chargeViewModel {
+                ChargeFlowView(viewModel: chargeViewModel) {
+                    path.removeAll()
+                }
+                .toolbar(.visible, for: .navigationBar)
             } else {
                 inspectionUnavailable
             }
@@ -790,7 +818,7 @@ struct GarageView: View {
         Set(
             path.compactMap { route -> UUID? in
                 switch route {
-                case .battery:
+                case .battery, .charge:
                     return nil
 
                 case .checklist(let sessionID),
