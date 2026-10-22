@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22758" systemVersion="23G93" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="BatteryEntity" representedClassName="NSManagedObject" syncable="YES">
+        <attribute name="brand" attributeType="String" defaultValueString=""/>
+        <attribute name="capacityWh" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="chargerID" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String" defaultValueString=""/>
+        <attribute name="purchaseDate" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="retiredReason" optional="YES" attributeType="String"/>
+        <attribute name="status" attributeType="String" defaultValueString="active"/>
+        <relationship name="charger" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ChargerEntity" inverseName="batteries" inverseEntity="ChargerEntity"/>
+        <relationship name="chargeSessions" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="ChargeSessionEntity" inverseName="battery" inverseEntity="ChargeSessionEntity"/>
+        <relationship name="inspections" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="InspectionEntity" inverseName="battery" inverseEntity="InspectionEntity"/>
+    </entity>
+    <entity name="ChargeSessionEntity" representedClassName="NSManagedObject" syncable="YES">
+        <attribute name="batteryID" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="chargerID" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="checklistLabels" optional="YES" attributeType="Binary"/>
+        <attribute name="checklistTicks" optional="YES" attributeType="Binary"/>
+        <attribute name="endedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="overnight" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="place" attributeType="String" defaultValueString="other"/>
+        <attribute name="plannedDurationMinutes" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="plannedUnplugAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="riskLevel" optional="YES" attributeType="String"/>
+        <attribute name="rulesVersion" attributeType="String" defaultValueString=""/>
+        <attribute name="startedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="status" attributeType="String" defaultValueString="running"/>
+        <relationship name="battery" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="BatteryEntity" inverseName="chargeSessions" inverseEntity="BatteryEntity"/>
+        <relationship name="charger" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ChargerEntity" inverseName="chargeSessions" inverseEntity="ChargerEntity"/>
+        <relationship name="riskFlags" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="RiskFlagEntity" inverseName="chargeSession" inverseEntity="RiskFlagEntity"/>
+    </entity>
+    <entity name="ChargerEntity" representedClassName="NSManagedObject" syncable="YES">
+        <attribute name="brand" attributeType="String" defaultValueString=""/>
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="name" attributeType="String" defaultValueString=""/>
+        <relationship name="batteries" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="BatteryEntity" inverseName="charger" inverseEntity="BatteryEntity"/>
+        <relationship name="chargeSessions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ChargeSessionEntity" inverseName="charger" inverseEntity="ChargeSessionEntity"/>
+    </entity>
+    <entity name="InspectionEntity" representedClassName="NSManagedObject" syncable="YES">
+        <attribute name="batteryID" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="inspectedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="result" attributeType="String" defaultValueString="pass"/>
+        <attribute name="source" attributeType="String" defaultValueString="manual"/>
+        <relationship name="battery" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="BatteryEntity" inverseName="inspections" inverseEntity="BatteryEntity"/>
+        <relationship name="items" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="InspectionItemEntity" inverseName="inspection" inverseEntity="InspectionItemEntity"/>
+        <relationship name="photos" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="PhotoEvidenceEntity" inverseName="inspection" inverseEntity="PhotoEvidenceEntity"/>
+    </entity>
+    <entity name="InspectionItemEntity" representedClassName="NSManagedObject" syncable="YES">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isProblem" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="kind" attributeType="String" defaultValueString=""/>
+        <attribute name="note" optional="YES" attributeType="String"/>
+        <attribute name="sortIndex" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="inspection" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InspectionEntity" inverseName="items" inverseEntity="InspectionEntity"/>
+    </entity>
+    <entity name="PhotoEvidenceEntity" representedClassName="NSManagedObject" syncable="YES">
+        <attribute name="capturedAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="filename" attributeType="String" defaultValueString=""/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="sortIndex" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="inspection" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="InspectionEntity" inverseName="photos" inverseEntity="InspectionEntity"/>
+    </entity>
+    <entity name="RiskFlagEntity" representedClassName="NSManagedObject" syncable="YES">
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="message" attributeType="String" defaultValueString=""/>
+        <attribute name="severity" attributeType="String" defaultValueString="low"/>
+        <attribute name="sortIndex" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="type" attributeType="String" defaultValueString=""/>
+        <relationship name="chargeSession" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ChargeSessionEntity" inverseName="riskFlags" inverseEntity="ChargeSessionEntity"/>
+    </entity>
+</model>

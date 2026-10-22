@@ -1,7 +1,7 @@
 import Foundation
 
-/// Keeps charge sessions in memory until the Core Data version replaces it.
-/// Sessions are lost when the app closes.
+/// Test and preview double for CoreDataChargeRepository. Keeps charge sessions in memory only.
+/// Sessions are lost when the app closes, so the app itself does not use it.
 @MainActor
 final class InMemoryChargeRepository: ChargeRepository {
     private var sessions: [UUID: ChargeSession]
