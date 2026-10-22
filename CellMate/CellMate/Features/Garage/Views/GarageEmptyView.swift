@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct GarageEmptyView: View {
-    let onAddBattery: () -> Void
+    /// A battery has to be matched to a charger, so an empty Garage starts with the charger.
+    let onAddCharger: () -> Void
 
     var body: some View {
         VStack(spacing: Spacing.lg) {
@@ -20,7 +21,7 @@ struct GarageEmptyView: View {
 
     private var introductionCard: some View {
         VStack(spacing: Spacing.md) {
-            Image(systemName: "battery.0")
+            Image(systemName: "powerplug")
                 .font(.system(size: 30, weight: .regular))
                 .foregroundStyle(AppColor.accent)
                 .frame(width: 88, height: 88)
@@ -31,31 +32,26 @@ struct GarageEmptyView: View {
                         style: .continuous
                     )
                 )
-                .overlay {
-                    Image(systemName: "plus")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(AppColor.accent)
-                }
                 .accessibilityHidden(true)
                 .padding(.top, Spacing.lg)
 
-            Text("Add your first battery")
+            Text("Add your first charger")
                 .font(.title2.bold())
                 .foregroundStyle(AppColor.textPrimary)
                 .multilineTextAlignment(.center)
                 .accessibilityAddTraits(.isHeader)
 
             Text(
-                "Give your e-bike or e-scooter battery a home "
-                + "for charge logs, checks and reminders."
+                "Each battery is matched to the charger it uses, "
+                + "so start with your charger. Your battery comes next."
             )
             .font(.subheadline)
             .foregroundStyle(AppColor.textSecondary)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
 
-            Button(action: onAddBattery) {
-                Label("Add battery", systemImage: "plus")
+            Button(action: onAddCharger) {
+                Label("Add charger", systemImage: "plus")
                     .padding(.horizontal, Spacing.md)
                     .padding(.vertical, Spacing.sm)
             }
@@ -73,7 +69,7 @@ struct GarageEmptyView: View {
                 .accessibilityHidden(true)
 
             Text(
-                "Start with the details on your battery label. "
+                "Use the details on your charger label. "
                 + "You can update them later."
             )
             .font(.footnote)
@@ -86,13 +82,13 @@ struct GarageEmptyView: View {
 }
 
 #Preview("Light") {
-    GarageEmptyView(onAddBattery: {})
+    GarageEmptyView(onAddCharger: {})
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .screenBackground()
 }
 
 #Preview("Dark") {
-    GarageEmptyView(onAddBattery: {})
+    GarageEmptyView(onAddCharger: {})
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .screenBackground()
         .preferredColorScheme(.dark)

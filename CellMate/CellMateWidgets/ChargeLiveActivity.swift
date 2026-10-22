@@ -9,7 +9,8 @@ struct ChargeLiveActivity: Widget {
         ActivityConfiguration(for: ChargeActivityAttributes.self) { context in
             // The Lock Screen picks its own light or dark look, so text uses .primary/.secondary
             // instead of AppColor text colours, which would clash with the system background.
-            ChargeLockScreenView(batteryName: context.attributes.batteryName, state: context.state)
+            ChargeLockScreenView(batteryName: context.attributes.batteryName, state: context.state, isStale: context.isStale)
+                .widgetURL(AppLink.charge)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
@@ -18,7 +19,7 @@ struct ChargeLiveActivity: Widget {
                         .foregroundStyle(AppColor.accent)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Countdown(state: context.state)
+                    Countdown(state: context.state, isStale: context.isStale)
                         .font(.title3.bold())
                 }
                 DynamicIslandExpandedRegion(.bottom) {
@@ -39,12 +40,13 @@ struct ChargeLiveActivity: Widget {
                 Image(systemName: "bolt.fill")
                     .foregroundStyle(AppColor.accent)
             } compactTrailing: {
-                Countdown(state: context.state)
+                Countdown(state: context.state, isStale: context.isStale)
                     .frame(maxWidth: 56)
             } minimal: {
                 Image(systemName: "bolt.fill")
                     .foregroundStyle(AppColor.accent)
             }
+            .widgetURL(AppLink.charge)
         }
     }
 }
@@ -52,6 +54,7 @@ struct ChargeLiveActivity: Widget {
 private struct ChargeLockScreenView: View {
     let batteryName: String
     let state: ChargeActivityAttributes.ContentState
+    let isStale: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -61,7 +64,7 @@ private struct ChargeLockScreenView: View {
                     .foregroundStyle(AppColor.accent)
                     .lineLimit(1)
                 Spacer()
-                Countdown(state: state)
+                Countdown(state: state, isStale: isStale)
                     .font(.title2.bold())
                     .foregroundStyle(.primary)
             }
@@ -78,13 +81,23 @@ private struct ChargeLockScreenView: View {
 }
 
 /// Live "1:24:00" countdown to the unplug time. iOS updates it without the app running.
+/// The activity goes stale at the unplug time, and then it reads "Unplug now".
 private struct Countdown: View {
     let state: ChargeActivityAttributes.ContentState
+    let isStale: Bool
 
     var body: some View {
-        Text(timerInterval: Date.now...max(state.unplugAt, .now), countsDown: true)
-            .monospacedDigit()
-            .multilineTextAlignment(.trailing)
+        Group {
+            if isStale || state.unplugAt <= .now {
+                Text("Unplug now")
+            } else {
+                Text(timerInterval: Date.now...state.unplugAt, countsDown: true)
+            }
+        }
+        .monospacedDigit()
+        .multilineTextAlignment(.trailing)
+        .lineLimit(1)
+        .minimumScaleFactor(0.6)
     }
 }
 

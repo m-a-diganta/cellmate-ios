@@ -196,7 +196,7 @@ struct GarageView: View {
                     viewModel.chargers.isEmpty {
             GeometryReader { geometry in
                 ScrollView {
-                    GarageEmptyView(onAddBattery: openAddBattery)
+                    GarageEmptyView(onAddCharger: { activeSheet = .addCharger })
                         .padding(.vertical, Spacing.lg)
                         .frame(
                             minHeight: geometry.size.height,

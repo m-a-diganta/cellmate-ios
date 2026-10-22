@@ -13,4 +13,18 @@ enum AppTab: Hashable {
 @Observable
 final class AppRouter {
     var selectedTab: AppTab = .home
+    /// Set when a widget or the Live Activity asks for the charge screen. Home opens it and clears it.
+    var opensCharge = false
+
+    func open(_ url: URL) {
+        switch url {
+        case AppLink.charge:
+            selectedTab = .home
+            opensCharge = true
+        case AppLink.garage:
+            selectedTab = .garage
+        default:
+            break
+        }
+    }
 }

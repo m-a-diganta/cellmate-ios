@@ -57,12 +57,21 @@ struct HomeView: View {
                 destination(for: route)
             }
             .task { await viewModel.load() }
+            .onAppear(perform: openChargeIfAsked)
+            .onChange(of: router.opensCharge) { openChargeIfAsked() }
             .onChange(of: path) { _, newPath in
                 if newPath.isEmpty {
                     Task { await viewModel.load() }
                 }
             }
         }
+    }
+
+    /// A widget or the Live Activity was tapped: show the charge flow on top of Home.
+    private func openChargeIfAsked() {
+        guard router.opensCharge else { return }
+        router.opensCharge = false
+        path = [.charging]
     }
 
     @ViewBuilder

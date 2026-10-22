@@ -67,7 +67,10 @@
 				DesignSystem/Theme/AppColor.swift,
 				DesignSystem/Theme/ColorHex.swift,
 				DesignSystem/Theme/Spacing.swift,
+				Data/WidgetSnapshotStore.swift,
+				Domain/Models/AppLink.swift,
 				Domain/Models/ChargeActivityAttributes.swift,
+				Domain/Models/WidgetSnapshot.swift,
 			);
 			target = EC8502A430847990001CBEE2 /* CellMateWidgetsExtension */;
 		};
@@ -472,6 +475,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CellMate/CellMate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 47W4AWVQUK;
@@ -505,6 +509,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = CellMate/CellMate.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 47W4AWVQUK;
@@ -620,6 +625,7 @@
 		EC8502A930847990001CBEE2 /* Debug configuration for PBXNativeTarget "CellMateWidgetsExtension" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = CellMateWidgets/CellMateWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 47W4AWVQUK;
@@ -648,6 +654,7 @@
 		EC8502AA30847990001CBEE2 /* Release configuration for PBXNativeTarget "CellMateWidgetsExtension" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = CellMateWidgets/CellMateWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 47W4AWVQUK;

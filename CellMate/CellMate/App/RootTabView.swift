@@ -19,6 +19,7 @@ struct RootTabView: View {
         }
         .tint(AppColor.accent)
         .environment(router)
+        .onOpenURL { router.open($0) }
     }
 }
 
