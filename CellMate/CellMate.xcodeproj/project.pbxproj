@@ -64,10 +64,11 @@
 		EC8502A330847990001CBEE2 /* Exceptions for "CellMate" folder in "CellMateWidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Data/WidgetSnapshotStore.swift,
+				DesignSystem/Theme/AppAppearance.swift,
 				DesignSystem/Theme/AppColor.swift,
 				DesignSystem/Theme/ColorHex.swift,
 				DesignSystem/Theme/Spacing.swift,
-				Data/WidgetSnapshotStore.swift,
 				Domain/Models/AppLink.swift,
 				Domain/Models/ChargeActivityAttributes.swift,
 				Domain/Models/WidgetSnapshot.swift,
