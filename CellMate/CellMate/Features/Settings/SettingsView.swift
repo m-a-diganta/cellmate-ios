@@ -6,7 +6,7 @@ struct SettingsView: View {
     @AppStorage(AppStorageKey.bedtimeMinutes) private var bedtimeMinutes = BedtimeSetting.defaultMinutes
     @AppStorage(AppStorageKey.hasCompletedOnboarding) private var hasCompletedOnboarding = true
     @Environment(\.openURL) private var openURL
-    @State private var viewModel = SettingsViewModel(records: PlaceholderRecordsManager())
+    @State private var viewModel = SettingsViewModel(records: AppContainer.shared.records)
     @State private var showBedtimePicker = false
     @State private var showDeleteConfirmation = false
 

@@ -1,6 +1,6 @@
 import Foundation
 
-/// Storage for charge sessions. The in-memory version is used until Core Data replaces it.
+/// Storage for charge sessions. Saved in Core Data by CoreDataChargeRepository; InMemoryChargeRepository is the test double.
 @MainActor
 protocol ChargeRepository: AnyObject {
     /// Saves a new session (Start charge).

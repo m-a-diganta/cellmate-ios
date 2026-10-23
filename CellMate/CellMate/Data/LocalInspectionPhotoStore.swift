@@ -12,24 +12,22 @@ import ImageIO
 final class LocalInspectionPhotoStore: InspectionPhotoStoring {
     private let directory: URL
 
-    init(directory: URL? = nil) throws {
-        if let directory {
-            self.directory = directory
-        } else {
-            let applicationSupport = try FileManager.default.url(
-                for: .applicationSupportDirectory,
-                in: .userDomainMask,
-                appropriateFor: nil,
-                create: true
-            )
+    /// Where inspection photos live: Application Support/CellMate/InspectionPhotos.
+    static func defaultDirectory() throws -> URL {
+        let applicationSupport = try FileManager.default.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        )
 
-            self.directory = applicationSupport
-                .appendingPathComponent("CellMate", isDirectory: true)
-                .appendingPathComponent(
-                    "InspectionPhotos",
-                    isDirectory: true
-                )
-        }
+        return applicationSupport
+            .appendingPathComponent("CellMate", isDirectory: true)
+            .appendingPathComponent("InspectionPhotos", isDirectory: true)
+    }
+
+    init(directory: URL? = nil) throws {
+        self.directory = try directory ?? Self.defaultDirectory()
     }
 
     func savePhoto(
