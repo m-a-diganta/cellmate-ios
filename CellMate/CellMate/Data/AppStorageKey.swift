@@ -2,4 +2,5 @@
 nonisolated enum AppStorageKey {
     static let hasCompletedOnboarding = "hasCompletedOnboarding"
     static let bedtimeMinutes = "bedtimeMinutes"
+    static let appearance = "appearance"
 }

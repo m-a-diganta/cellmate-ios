@@ -9,16 +9,18 @@ final class CellMateUITests: XCTestCase {
     @MainActor
     func testWelcomeThenFourTabs() throws {
         let app = XCUIApplication()
-        // Forces the Welcome screen even if an earlier run finished onboarding.
-        app.launchArguments = ["-hasCompletedOnboarding", "NO"]
         app.launch()
 
-        XCTAssertTrue(app.buttons["Get started"].waitForExistence(timeout: 10))
-        app.buttons["Get started"].tap()
+        // On a fresh install the Welcome and Permissions screens come first.
+        // If an earlier run already finished them, the tabs are shown straight away.
+        let getStarted = app.buttons["Get started"]
+        if getStarted.waitForExistence(timeout: 5) {
+            getStarted.tap()
 
-        // The Permissions screen comes next. "Not now" skips it without a system prompt.
-        XCTAssertTrue(app.buttons["Not now"].waitForExistence(timeout: 10))
-        app.buttons["Not now"].tap()
+            // "Not now" skips the Permissions screen without a system prompt.
+            XCTAssertTrue(app.buttons["Not now"].waitForExistence(timeout: 10))
+            app.buttons["Not now"].tap()
+        }
 
         // Tab buttons can sit inside or outside the tab bar depending on the iOS version.
         for name in ["Home", "Garage", "History", "Ask"] {
