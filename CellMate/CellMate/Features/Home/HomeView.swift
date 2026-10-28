@@ -12,6 +12,7 @@ struct HomeView: View {
     @Environment(AppRouter.self) private var router
     @State private var viewModel: HomeViewModel
     @State private var path: [HomeRoute] = []
+    @AppStorage(AppStorageKey.appearance) private var appearance = AppAppearance.system.rawValue
 
     init() {
         self.init(viewModel: HomeViewModel(provider: AppContainer.shared.homeSummaryProvider))
@@ -44,7 +45,8 @@ struct HomeView: View {
             .screenBackground()
             .navigationTitle("Home")
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItemGroup(placement: .primaryAction) {
+                    appearanceMenu
                     Button {
                         path.append(.settings)
                     } label: {
@@ -65,6 +67,21 @@ struct HomeView: View {
                 }
             }
         }
+    }
+
+    /// Light, Dark or System. The choice is saved and RootView applies it to the whole app.
+    private var appearanceMenu: some View {
+        Menu {
+            Picker("Appearance", selection: $appearance) {
+                ForEach(AppAppearance.allCases) { option in
+                    Label(option.title, systemImage: option.symbol).tag(option.rawValue)
+                }
+            }
+        } label: {
+            Image(systemName: AppAppearance(stored: appearance).symbol)
+        }
+        .accessibilityLabel("Appearance")
+        .accessibilityValue(AppAppearance(stored: appearance).title)
     }
 
     /// A widget or the Live Activity was tapped: show the charge flow on top of Home.

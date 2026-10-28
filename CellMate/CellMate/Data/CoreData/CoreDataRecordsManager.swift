@@ -123,12 +123,12 @@ struct CoreDataRecordsManager: RecordsManaging {
         return rows.map { $0.map(Self.csvField).joined(separator: ",") }.joined(separator: "\n") + "\n"
     }
 
-    private static func sort(_ key: String, _ ascending: Bool) -> NSSortDescriptor {
+    private nonisolated static func sort(_ key: String, _ ascending: Bool) -> NSSortDescriptor {
         NSSortDescriptor(key: key, ascending: ascending)
     }
 
     /// Quotes a field when needed. A leading = + - or @ is neutralised so a spreadsheet never runs it as a formula.
-    private static func csvField(_ raw: String) -> String {
+    private nonisolated static func csvField(_ raw: String) -> String {
         var value = raw
         if let first = value.first, "=+-@".contains(first) { value = "'" + value }
         guard value.contains(where: { $0 == "," || $0 == "\"" || $0 == "\n" || $0 == "\r" }) else { return value }

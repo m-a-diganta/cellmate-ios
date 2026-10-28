@@ -25,11 +25,13 @@ final class AppContainer {
     )
 
     /// - Parameter persistence: Pass `PersistenceController(inMemory: true)` for previews and tests.
-    init(persistence: PersistenceController = .shared) {
-        self.persistence = persistence
-        self.garage = CoreDataGarageRepository(persistence: persistence)
-        self.charges = CoreDataChargeRepository(persistence: persistence)
-        self.inspections = CoreDataInspectionRepository(persistence: persistence)
+    ///   Nil uses the app's shared store.
+    init(persistence: PersistenceController? = nil) {
+        let store = persistence ?? PersistenceController.shared
+        self.persistence = store
+        self.garage = CoreDataGarageRepository(persistence: store)
+        self.charges = CoreDataChargeRepository(persistence: store)
+        self.inspections = CoreDataInspectionRepository(persistence: store)
 
         let notifications = ChargeAlertScheduler()
         let activity = SystemChargeActivityService()
@@ -37,7 +39,7 @@ final class AppContainer {
         self.activity = activity
 
         // After "Delete all data": stop the alerts, the Live Activity and the widget for the removed charges.
-        self.records = CoreDataRecordsManager(persistence: persistence) { sessionIDs in
+        self.records = CoreDataRecordsManager(persistence: store) { sessionIDs in
             for id in sessionIDs { notifications.cancelAlerts(forSessionID: id) }
             WidgetSnapshotStore.save(.empty)
             WidgetCenter.shared.reloadAllTimelines()
