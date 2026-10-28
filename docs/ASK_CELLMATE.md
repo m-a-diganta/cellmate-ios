@@ -1,10 +1,10 @@
-# Ask CellMate — Person 5 / Hanting Wang
+# Ask CellMate: Person 5 / Hanting Wang
 
 Work branch: `hanting-wang`. Scope: Ask, Ask result, Quick check, `AssessBatteryProblem`, and the `BatteryAssistant` service.
 
 ## Environment
 
-Use Xcode **27 or later**. Implementation uses Xcode **27.1 (27A9275)**, iOS **27.1 SDK**, and an iPhone 18 Pro simulator running **iOS 27.0**. The shared deployment target stays at iOS 26.0; Xcode version and minimum supported iOS version are different settings. No signing team or bundle identifier was changed.
+The feature was built with Xcode **27.1 (27A9275)**, the iOS **27.1 SDK**, and an iPhone 18 Pro simulator running **iOS 27.0**. The shared deployment target is iOS 26.0, so devices and simulators on iOS 26 can run the app. Xcode version and minimum supported iOS version are different settings. Foundation Models availability is checked at runtime, and Quick check works without it. No signing team or bundle identifier was changed.
 
 ## Flow and boundaries
 
@@ -18,15 +18,16 @@ Use Xcode **27 or later**. Implementation uses Xcode **27.1 (27A9275)**, iOS **2
 
 The layers are SwiftUI views → `AskViewModel` → `AssessBatteryProblem` → `BatteryAssistant` / repository protocols. Views do not read a database.
 
-## Integration needed from Person 1 and Person 4
+## Integration with the shared app (done)
 
-The shared branch currently contains placeholder data and inspection features. Ask intentionally does not create a competing database or pretend to save records.
+Ask does not create its own database. The shared app now connects it through `Data/AskDataAdapters.swift`:
 
-- Implement `AskBatteryProviding.batteries()` as a projection from the shared battery repository to `AskBattery` (UUID, name, brand, retired).
-- Implement `AskInspectionLogging.log(_:for:)` by calling Person 4's `LogInspection`. Use `BatteryAssessment.id` as an idempotency key, preserve the assessment date, symptoms, source and `rulesVersion`, and associate it with the chosen battery.
-- An Ask result is a **reported concern**, not proof that all five physical inspection checks were performed. Do not mark unasked inspection items as OK. Map severity to the shared inspection schema only after agreeing this with Person 4.
-- Construct `AskDependencies(assistant:batteries:inspections:)` in the shared dependency container and pass it to `AskView(dependencies:)` in `RootTabView`.
-- Until this is connected, `AskDependencies.pendingIntegration()` supplies no battery records. Guidance works, but Log as inspection reports that nothing was saved. The multi-battery picker and save success/failure paths are tested using mocks.
+- `GarageAskBatteryProvider` implements `AskBatteryProviding.batteries()`. It projects the Garage repository to `AskBattery` (UUID, name, brand, retired).
+- `InspectionAskLogger` implements `AskInspectionLogging.log(_:for:)`. It saves the result as an `Inspection` with the source `assistant`, using `BatteryAssessment.id` as the inspection id, so saving the same result twice changes nothing.
+- An Ask result is a **reported concern**, not proof that all five physical inspection checks were performed. Emergency and Stop using results are saved as a fail. Caution and Info results are saved as a caution, never as a pass. Each symptom is mapped to one of the five checks as a problem item, and unasked checks are not marked OK. This means Ask can never clear a battery or reset the monthly inspection date.
+- `AppContainer.askDependencies` is built once and passed to `AskView(dependencies:)` in `RootTabView`.
+- `AskDependencies.pendingIntegration()` remains only for previews and for `AskView()` without dependencies. It supplies no battery records.
+- `AskDataAdaptersTests.swift` tests the mapping, duplicate saves and an unknown battery. The multi-battery picker and the save success and failure paths are also tested with mocks in `AskCellMateTests.swift`.
 
 ## Rules and source material
 
@@ -62,15 +63,15 @@ Demo without AI:
 2. Open Quick check → select Smoke or flames → Show guidance → Emergency.
 3. Start a fresh Quick check → select None of these signs noticed → Info with the safety limitation.
 4. Repeat in Dark Mode and with accessibility text sizes.
-5. Log as inspection currently explains that no record was saved; after integration, demonstrate selecting a battery and an actual saved inspection.
+5. Add a battery in Garage, return to Ask, choose that battery and tap Log as inspection. The saved record then appears in History and on the battery.
 
 `AskCellMateTests.swift` tests severity floors, AI failure/unavailability/cancellation, explicit checklist answers, retired batteries, scoped battery lookup, and repository save behaviour. `AskCellMateUITests.swift` covers the emergency flow, dark mode and large accessibility text. Real model generation still needs an Apple Intelligence-enabled device with its model downloaded; mock tests and simulator UI checks do not certify real-device inference.
 
 ## Validation scope
 
-On 21 October 2026, all **36 unit tests** passed on iOS 27.0, including **20 new Ask tests**. All **3 Ask UI tests** also passed; after the layout adjustment, the three UI tests were rerun successfully. Dark snapshots use the DEBUG-only `--ask-ui-dark` launch argument to set the Ask colour scheme explicitly; the simulator's system appearance switch did not produce a dark app screenshot. Release builds follow the device's appearance. Use serial simulator testing (`-parallel-testing-enabled NO`); an initial parallel run hit an accessibility-service startup timeout.
+On 21 October 2026, all **36 unit tests** passed on iOS 27.0 at that time, including **20 new Ask tests**. The full project now has 137 unit tests and 4 UI tests. All **3 Ask UI tests** also passed; after the layout adjustment, the three UI tests were rerun successfully. Dark snapshots use the DEBUG-only `--ask-ui-dark` launch argument to set the Ask colour scheme explicitly; the simulator's system appearance switch did not produce a dark app screenshot. Release builds follow the device's appearance. Use serial simulator testing (`-parallel-testing-enabled NO`); an initial parallel run hit an accessibility-service startup timeout.
 
-The existing `CellMateUITests.testWelcomeThenFourTabs` also failed during the exploratory full-suite run. It was not changed or included in the final Ask-focused run; its onboarding flow needs a separate check by the shell owner. A passing Ask suite must not be reported as a passing complete app UI suite.
+The shell test `CellMateUITests.testWelcomeThenFourTabs` failed during the exploratory full-suite run because it forced the onboarding flag. The shell owner has since fixed it. A passing Ask suite must still not be reported as a passing complete app UI suite.
 
 ## Authorship disclosure
 
